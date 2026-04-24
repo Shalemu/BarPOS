@@ -15,21 +15,13 @@ class OrdersController extends GetxController {
     try {
       isLoading.value = true;
 
-      // TODO: replace with API call later
       await Future.delayed(const Duration(seconds: 1));
 
-      orders.value = [
-        {
-          "id": 1,
-          "name": "Order #1001",
-          "status": "Pending",
-        },
-        {
-          "id": 2,
-          "name": "Order #1002",
-          "status": "Completed",
-        },
-      ];
+      // EMPTY by default (no fake data)
+      orders.clear();
+
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
     } finally {
       isLoading.value = false;
     }

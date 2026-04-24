@@ -8,11 +8,13 @@ import 'login_controller.dart';
 
 class LoginScreen extends GetView<LoginController> {
   const LoginScreen({super.key});
+  
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final isSmall = size.height < 650;
+    final LoginController controller = Get.put(LoginController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
@@ -142,25 +144,25 @@ class LoginScreen extends GetView<LoginController> {
                         const SizedBox(height: 20),
 
                         /// REGISTER LINK
-                        GestureDetector(
-                          onTap: () {
-                            Get.offAllNamed(AppRoutes.register);
-                          },
-                          child: const Text.rich(
-                            TextSpan(
-                              text: "Don’t have an account? ",
-                              children: [
-                                TextSpan(
-                                  text: "Sign Up",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        // GestureDetector(
+                        //   onTap: () {
+                        //     Get.offAllNamed(AppRoutes.register);
+                        //   },
+                        //   child: const Text.rich(
+                        //     TextSpan(
+                        //       text: "Don’t have an account? ",
+                        //       children: [
+                        //         TextSpan(
+                        //           text: "Sign Up",
+                        //           style: TextStyle(
+                        //             fontWeight: FontWeight.bold,
+                        //             color: AppColors.primary,
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),

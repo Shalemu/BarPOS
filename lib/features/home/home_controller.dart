@@ -12,6 +12,7 @@ class HomeController extends GetxController {
   var selectedCategory = 0.obs;
   var products = <ProductModel>[].obs;
   var isLoadingProducts = false.obs;
+  var isLoadingCounters = false.obs;
 
   final CounterService _counterService = CounterService();
   final AuthProvider authProvider = Get.find<AuthProvider>();
@@ -35,52 +36,45 @@ class HomeController extends GetxController {
   }
 
   Future<void> loadCounters(String token) async {
-    try {
-      print("========== LOAD COUNTERS START ==========");
-      print("TOKEN: $token");
+  try {
+    isLoadingCounters.value = true;
 
-      final response = await _counterService.fetchCounters(token);
+    print("========== LOAD COUNTERS START ==========");
 
-      print("RESPONSE SUCCESS: ${response.isSuccess}");
-      print("MESSAGE: ${response.message}");
+    final response = await _counterService.fetchCounters(token);
 
-      if (response.isSuccess) {
-        counters.value = (response.data as List)
-            .map((e) => CounterModel.fromJson(e))
-            .toList();
-
-        print("COUNTERS LOADED: ${counters.length}");
-      }
-
-      print("========== LOAD COUNTERS END ==========");
-    } catch (e, stack) {
-      print("ERROR: $e");
-      print(stack);
-
-      _safeSnackbar("Error", e.toString());
+    if (response.isSuccess) {
+      counters.value = (response.data as List)
+          .map((e) => CounterModel.fromJson(e))
+          .toList();
     }
-  }
 
-  Future<void> loadProducts(int counterId) async {
+    print("========== LOAD COUNTERS END ==========");
+  } catch (e) {
+    _safeSnackbar("Error", e.toString());
+  } finally {
+    isLoadingCounters.value = false;
+  }
+}
+
+ Future<void> loadProducts(int counterId) async {
+  try {
+    isLoadingProducts.value = true;
+
     final token = authProvider.accessToken.value;
 
-    print("TOKEN: $token");
-    print("COUNTER ID: $counterId");
+    if (token == null) return;
 
-    if (token == null) {
-      print("TOKEN IS NULL");
-      return;
-    }
-
-    final result = await ProductService().fetchCounterProducts(
-      token,
-      counterId,
-    );
+    final result = await ProductService()
+        .fetchCounterProducts(token, counterId);
 
     products.value = result;
-
-    print("PRODUCTS LOADED: ${products.length}");
+  } catch (e) {
+    _safeSnackbar("Error", e.toString());
+  } finally {
+    isLoadingProducts.value = false;
   }
+}
 
   void _safeSnackbar(String title, String message) {
     if (Get.context != null) {

@@ -1,4 +1,5 @@
 import 'package:barpos/core/constants/app_colors.dart';
+import 'package:barpos/core/widgets/dot_loader.dart';
 import 'package:barpos/features/home/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -101,7 +102,22 @@ class CounterSelectionWidget extends StatelessWidget {
 
             //COUNTER CARDS
             Obx(() {
-              
+              if (controller.isLoadingCounters.value) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(
+                    child: DotLoader(), 
+                  ),
+                );
+              }
+
+              if (controller.counters.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Center(child: Text("No counters available")),
+                );
+              }
+
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -118,45 +134,34 @@ class CounterSelectionWidget extends StatelessWidget {
                   return GestureDetector(
                     onTap: () {
                       controller.selectCounter(counter);
-
-                      controller.loadProducts(
-                        counter.id,
-                      ); 
+                      controller.loadProducts(counter.id);
                     },
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: AppColors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(color: Colors.black12, blurRadius: 6),
                         ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          /// ICON
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              // ignore: deprecated_member_use
                               color: AppColors.primary.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(Icons.local_bar),
                           ),
-
                           const Spacer(),
-
-                          /// COUNTER NAME
                           Text(
                             counter.name,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-
                           const SizedBox(height: 4),
-
-                          /// BAR NAME / EXTRA INFO
                           const Text(
                             "Main Bar",
                             style: TextStyle(fontSize: 12, color: Colors.grey),

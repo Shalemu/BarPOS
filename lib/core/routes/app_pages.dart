@@ -37,7 +37,7 @@ import 'app_routes.dart';
 class AppPages {
   static final pages = [
     GetPage(
-      name: AppRoutes.splash,
+      name: AppRoutes.splashScreen,
       page: () => const SplashScreen(),
       binding: SplashBinding(),
     ),
@@ -59,17 +59,17 @@ class AppPages {
       binding: RegisterBinding(),
     ),
 
-GetPage(
-  name: AppRoutes.forgotPassword,
-  page: () => const ForgotPasswordScreen(),
-  binding: ForgotPasswordBinding(),
-),
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => const ForgotPasswordScreen(),
+      binding: ForgotPasswordBinding(),
+    ),
 
-   GetPage(
-  name: '/verify-code',
-  page: () => const VerifyCodeScreen(),
-  binding: ForgotPasswordBinding(), 
-),
+    GetPage(
+      name: '/verify-code',
+      page: () => const VerifyCodeScreen(),
+      binding: ForgotPasswordBinding(),
+    ),
     GetPage(
       name: '/reset-password',
       page: () => const ResetPasswordScreen(),

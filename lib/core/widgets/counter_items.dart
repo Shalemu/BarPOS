@@ -1,4 +1,5 @@
 import 'package:barpos/core/constants/app_colors.dart';
+import 'package:barpos/core/widgets/dot_loader.dart';
 import 'package:barpos/features/cart/cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -80,6 +81,9 @@ class CounterItemsWidget extends StatelessWidget {
         /// PRODUCTS GRID
         Expanded(
           child: Obx(() {
+            if (controller.isLoadingProducts.value) {
+              return const Center(child: DotLoader());
+            }
             if (controller.products.isEmpty) {
               return const Center(child: Text("No products found"));
             }
@@ -193,7 +197,7 @@ class CounterItemsWidget extends StatelessWidget {
                               if (qty == 0) {
                                 return GestureDetector(
                                   onTap: () {
-                                   cartController.addToCart(item);
+                                    cartController.addToCart(item);
                                   },
                                   child: Container(
                                     height: 36,
