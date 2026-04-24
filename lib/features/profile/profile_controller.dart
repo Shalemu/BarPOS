@@ -6,16 +6,26 @@ class ProfileController extends GetxController {
 
   var isLoading = false.obs;
 
+
   String get userName =>
-      authProvider.user?.firstName ?? "User";
+      authProvider.user.value?.firstName ?? "User";
 
   String get email =>
-      authProvider.user?.email ?? "No email";
+      authProvider.user.value?.email ?? "No email";
 
   String get phone =>
-    authProvider.user?.phoneNumber ?? "No phone";
+      authProvider.user.value?.phoneNumber ?? "No phone";
 
-  void logout() {
-    authProvider.logout();
+ 
+  Future<void> logout() async {
+    isLoading.value = true;
+
+    try {
+      await authProvider.logout();
+    } catch (e) {
+      print("LOGOUT ERROR: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

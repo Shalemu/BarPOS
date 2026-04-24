@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:barpos/core/constants/api_constant.dart';
 import 'package:barpos/features/auth/models/LoginResponse.dart';
-import 'package:barpos/services/models/api_response.dart';
-import 'package:barpos/services/models/user_model.dart';
+import 'package:barpos/services/model/api_response.dart';
+import 'package:barpos/services/model/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -70,69 +70,61 @@ Future<ApiResponse<UserModel>> register({
   if (response.statusCode == 200 || response.statusCode == 201) {
     return ApiResponse<UserModel>.fromJson(
       decoded,
-      (data) => UserModel.fromJson(data["user"] ?? data),
+      (data) => UserModel.fromJson(data['user'] ?? data),
     );
   } else {
-    throw Exception(decoded["message"] ?? "Registration failed");
+    return ApiResponse.error(
+      decoded["message"] ?? "Registration failed",
+      statusCode: response.statusCode,
+    );
   }
 }
-
   // ==============================
   // Change Password
   // ==============================
-  Future<ApiResponse<void>> changePassword({
-    required String token,
-    required String oldPassword,
-    required String newPassword,
-    required String confirmPassword,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse(ApiConstants.changePassword),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'old_password': oldPassword,
-          'password': newPassword,
-          'confirm_password': confirmPassword,
-        }),
-      );
+ Future<ApiResponse<void>> changePassword({
+  required String token,
+  required String oldPassword,
+  required String newPassword,
+  required String confirmPassword,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse(ApiConstants.changePassword),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({
+        'old_password': oldPassword,
+        'password': newPassword,
+        'confirm_password': confirmPassword,
+      }),
+    );
 
-      final data = response.body.isNotEmpty ? jsonDecode(response.body) : {};
+    final data =
+        response.body.isNotEmpty ? jsonDecode(response.body) : {};
 
-      if (response.statusCode == 200) {
-        return ApiResponse<void>(
-          totalItem: 0,
-          detail: data['detail'] ?? 'Password changed successfully',
-          statusCode: 200,
-        );
-      }
-
-      String errorMessage = data['detail'] ?? 'Failed to change password';
-
-      if (!data.containsKey('detail')) {
-        errorMessage = data.values
-            .map((e) => e is List ? e.join(", ") : e.toString())
-            .join("\n");
-      }
-
-      return ApiResponse<void>(
-        totalItem: 0,
-        detail: errorMessage,
-        statusCode: response.statusCode,
-      );
-    } catch (e) {
-      return ApiResponse<void>(
-        totalItem: 0,
-        detail: 'Unexpected error: $e',
-        statusCode: 500,
+    if (response.statusCode == 200) {
+      return ApiResponse.success(
+        null,
+        message: data['message'] ?? 'Password changed successfully',
+        statusCode: 200,
       );
     }
-  }
 
+    return ApiResponse.error(
+      data['message'] ?? 'Failed to change password',
+      statusCode: response.statusCode,
+    );
+  } catch (e) {
+    return ApiResponse.error(
+      'Unexpected error: $e',
+      statusCode: 500,
+    );
+  }
+}
   Future<void> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();

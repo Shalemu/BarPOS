@@ -9,7 +9,7 @@ class ProfileScreen extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profile"),
+        // title: const Text("Profile"),
         centerTitle: true,
       ),
       body: Padding(
@@ -23,19 +23,24 @@ class ProfileScreen extends GetView<ProfileController> {
 
             const SizedBox(height: 20),
 
-            Obx(() => Text(
-                  controller.userName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )),
+            // NAME
+            Text(
+              controller.userName,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
 
             const SizedBox(height: 10),
 
-            Obx(() => Text(controller.email)),
+            // EMAIL
+            Text(controller.email),
+
             const SizedBox(height: 5),
-            Obx(() => Text(controller.phone)),
+
+            // PHONE
+            Text(controller.phone),
 
             const SizedBox(height: 30),
 

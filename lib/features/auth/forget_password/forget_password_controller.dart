@@ -1,92 +1,171 @@
 import 'dart:convert';
 import 'package:barpos/core/constants/api_constant.dart';
+import 'package:barpos/core/routes/app_routes.dart';
+import 'package:barpos/core/widgets/top_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-
-
-
 class ForgotPasswordController extends GetxController {
-  final phoneController = TextEditingController();
-  final otpController = TextEditingController();
+  // ================= CONTROLLERS =================
+
+  final emailController = TextEditingController();
+  final codeController = TextEditingController();
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  var otpSent = false.obs;
+  // ================= STATE =================
+
   var isLoading = false.obs;
 
   var obscureNew = true.obs;
   var obscureConfirm = true.obs;
 
-  void toggleNewPassword() {
-    obscureNew.value = !obscureNew.value;
-  }
+  String? savedEmail;
 
-  void toggleConfirmPassword() {
-    obscureConfirm.value = !obscureConfirm.value;
-  }
+  // ================= HELPERS =================
 
-  void showSnack(String message, {Color color = Colors.red}) {
-    Get.snackbar(
-      "Message",
-      message,
-      backgroundColor: color,
-      colorText: Colors.white,
-      snackPosition: SnackPosition.BOTTOM,
+  String get email => emailController.text.trim();
+
+  // ================= NOTIFICATIONS =================
+
+  void success(BuildContext context, String message) {
+    TopNotification.show(
+      context,
+      message: message,
+      color: Colors.green,
+      icon: Icons.check_circle,
     );
   }
 
-  /// REQUEST OTP
-  Future<void> requestOtp() async {
-    final phone = phoneController.text.trim();
+  void error(BuildContext context, String message) {
+    TopNotification.show(
+      context,
+      message: message,
+      color: Colors.redAccent,
+      icon: Icons.error_outline,
+    );
+  }
 
-    if (phone.isEmpty) {
-      showSnack('Please enter your phone number.');
+  // ================= STEP 1: SEND CODE =================
+
+  Future<void> sendCodeToEmail(BuildContext context) async {
+    if (email.isEmpty) {
+      error(context, "Please enter your email");
+      return;
+    }
+
+    savedEmail = email;
+
+    await _sendCodeRequest(context);
+
+    Get.toNamed('/verify-code');
+  }
+
+  // ================= RESEND CODE =================
+
+  Future<void> resendCode(BuildContext context) async {
+    if (savedEmail == null) {
+      error(context, "Email not found. Go back and enter email again.");
+      return;
+    }
+
+    await _sendCodeRequest(context);
+  }
+
+  // ================= API: SEND CODE =================
+
+  Future<void> _sendCodeRequest(BuildContext context) async {
+    try {
+      isLoading.value = true;
+
+      final response = await http.post(
+        Uri.parse(ApiConstants.forgotPassword),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': savedEmail}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        success(context, data['message'] ?? "Code sent successfully");
+      } else {
+        error(context, data['message'] ?? "Failed to send code");
+      }
+    } catch (e) {
+      print("SEND CODE ERROR: $e");
+      error(context, "Something went wrong");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // ================= STEP 2: VERIFY CODE =================
+
+  Future<void> verifyCode(BuildContext context) async {
+    final emailToUse = savedEmail;
+
+    if (emailToUse == null || codeController.text.trim().isEmpty) {
+      error(context, "Enter code");
       return;
     }
 
     try {
       isLoading.value = true;
 
+      final int? code = int.tryParse(codeController.text.trim());
+
+      if (code == null) {
+        error(context, "Code must be a number");
+        return;
+      }
+
       final response = await http.post(
-        Uri.parse(ApiConstants.otpRequestForPassword),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'phone': phone}),
+        Uri.parse(ApiConstants.tokenVerification),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email': emailToUse,
+          'code': code,
+        }),
       );
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200 && data['detail'] != null) {
-        showSnack(data['detail'], color: Colors.green);
-        otpSent.value = true;
+      if (response.statusCode == 200) {
+        success(context, "Code verified");
+
+        Future.delayed(const Duration(milliseconds: 300), () {
+          Get.offNamed(AppRoutes.resetPassword);
+        });
       } else {
-        showSnack(data['detail'] ?? 'Failed to send OTP.');
+        error(context, data['message'] ?? "Invalid code");
       }
     } catch (e) {
-      showSnack('Error: $e');
+      print("VERIFY ERROR: $e");
+      error(context, "Something went wrong");
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// RESET PASSWORD
-  Future<void> resetPassword() async {
-    final otp = otpController.text.trim();
-    final phone = phoneController.text.trim();
+  // ================= STEP 3: RESET PASSWORD =================
+
+  Future<void> resetPassword(BuildContext context) async {
     final newPassword = newPasswordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    if (otp.isEmpty ||
-        phone.isEmpty ||
+    if (savedEmail == null ||
         newPassword.isEmpty ||
         confirmPassword.isEmpty) {
-      showSnack('Please fill all fields.');
+      error(context, "Please fill all fields");
       return;
     }
 
     if (newPassword != confirmPassword) {
-      showSnack('Passwords do not match.');
+      error(context, "Passwords do not match");
       return;
     }
 
@@ -95,49 +174,39 @@ class ForgotPasswordController extends GetxController {
 
       final response = await http.post(
         Uri.parse(ApiConstants.resetPassword),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'otp': otp,
-          'phone': phone,
+          'email': savedEmail,
           'password': newPassword,
-          'confirm_password': confirmPassword,
+          'password_confirmation': confirmPassword,
         }),
       );
 
-      if (response.headers['content-type']
-              ?.contains('application/json') ??
-          false) {
-        final data = jsonDecode(response.body);
+      final data = jsonDecode(response.body);
 
-        if (response.statusCode == 200) {
-          showSnack(
-            data['detail'] ?? "Password reset successful",
-            color: Colors.green,
-          );
+      if (response.statusCode == 200) {
+        success(context, "Password reset successful");
 
-          Future.delayed(const Duration(seconds: 2), () {
-            Get.back();
-          });
-        } else {
-          showSnack(data.toString());
-        }
+        Future.delayed(const Duration(seconds: 2), () {
+          Get.offAllNamed(AppRoutes.login);
+        });
       } else {
-        showSnack("Server returned HTML error.");
+        error(context, data['message'] ?? "Reset failed");
       }
     } catch (e) {
-      showSnack("Error occurred. Check logs.");
+      print("RESET ERROR: $e");
+      error(context, "Something went wrong");
     } finally {
       isLoading.value = false;
     }
   }
 
+  // ================= CLEANUP =================
+
   @override
   void onClose() {
-    phoneController.dispose();
-    otpController.dispose();
+    emailController.dispose();
+    codeController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();
     super.onClose();

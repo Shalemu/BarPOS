@@ -1,5 +1,7 @@
 import 'package:barpos/features/auth/forget_password/forget_password.binding.dart';
 import 'package:barpos/features/auth/forget_password/forget_password_screen.dart';
+import 'package:barpos/features/auth/forget_password/reset_password_screen.dart';
+import 'package:barpos/features/auth/forget_password/verify-email.dart';
 import 'package:barpos/features/onboarding/onboarding_binding.dart';
 import 'package:barpos/features/onboarding/onboarding_screen.dart';
 import 'package:barpos/features/splash/splash_binding.dart';
@@ -57,12 +59,22 @@ class AppPages {
       binding: RegisterBinding(),
     ),
 
+GetPage(
+  name: AppRoutes.forgotPassword,
+  page: () => const ForgotPasswordScreen(),
+  binding: ForgotPasswordBinding(),
+),
+
+   GetPage(
+  name: '/verify-code',
+  page: () => const VerifyCodeScreen(),
+  binding: ForgotPasswordBinding(), 
+),
     GetPage(
-      name: AppRoutes.forgotPassword,
-      page: () => const ForgotPasswordScreen(),
+      name: '/reset-password',
+      page: () => const ResetPasswordScreen(),
       binding: ForgotPasswordBinding(),
     ),
-
     // HOME
     GetPage(
       name: AppRoutes.home,

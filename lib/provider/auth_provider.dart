@@ -1,98 +1,79 @@
 import 'dart:convert';
-import 'package:barpos/services/auth_service.dart';
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:barpos/services/models/user_model.dart';
+import 'package:barpos/services/model/user_model.dart';
 
-class AuthProvider with ChangeNotifier {
-  UserModel? _user;
-  String? _accessToken;
-  String? _refreshToken;
-  bool _isLoading = false;
+class AuthProvider extends GetxController {
 
-  // ================= GETTERS =================
-  UserModel? get user => _user;
-  String? get accessToken => _accessToken;
-  String? get refreshToken => _refreshToken;
+  final user = Rxn<UserModel>();
+  final accessToken = RxnString();
+  final refreshToken = RxnString();
+  final isLoading = false.obs;
 
-  bool get isLoading => _isLoading;
+ 
+  @override
+  void onInit() {
+    super.onInit();
+    loadFromPrefs();
+  }
+
 
   bool get isAuthenticated =>
-      _accessToken != null && _accessToken!.isNotEmpty;
+      accessToken.value != null && accessToken.value!.isNotEmpty;
 
-  // ================= SETTERS (STATE ONLY) =================
 
-  void setLoading(bool value) {
-    _isLoading = value;
-    notifyListeners();
-  }
-
-  void setUser(UserModel user) {
-    _user = user;
-    notifyListeners();
-  }
-
-  void setToken({
-    required String accessToken,
-    String? refreshToken,
-  }) {
-    _accessToken = accessToken;
-    _refreshToken = refreshToken;
-    notifyListeners();
-  }
-
-  void clear() {
-    _user = null;
-    _accessToken = null;
-    _refreshToken = null;
-    notifyListeners();
-  }
-
-  // ================= LOAD FROM STORAGE =================
   Future<void> loadFromPrefs() async {
-    setLoading(true);
+    isLoading.value = true;
 
     final prefs = await SharedPreferences.getInstance();
 
     final userData = prefs.getString('user');
-    final access = prefs.getString('access');
-    final refresh = prefs.getString('refresh');
+    final access = prefs.getString('access_token');
+    final refresh = prefs.getString('refresh_token');
 
     if (userData != null) {
-      _user = UserModel.fromJson(jsonDecode(userData));
+      user.value = UserModel.fromJson(jsonDecode(userData));
     }
 
-    _accessToken = access;
-    _refreshToken = refresh;
+    accessToken.value = access;
+    refreshToken.value = refresh;
 
-    setLoading(false);
+    print("Loaded token: ${accessToken.value}");
+
+    isLoading.value = false;
   }
 
-  // ================= SAVE TO STORAGE =================
-  Future<void> persist() async {
+ 
+  Future<void> saveAuth({
+    required UserModel userData,
+    required String token,
+    String? refresh,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
 
-    if (_user != null) {
-      await prefs.setString('user', jsonEncode(_user!.toJson()));
+    await prefs.setString('user', jsonEncode(userData.toJson()));
+    await prefs.setString('access_token', token);
+
+    if (refresh != null) {
+      await prefs.setString('refresh_token', refresh);
     }
 
-    if (_accessToken != null) {
-      await prefs.setString('access', _accessToken!);
-    }
+    user.value = userData;
+    accessToken.value = token;
+    refreshToken.value = refresh;
 
-    if (_refreshToken != null) {
-      await prefs.setString('refresh', _refreshToken!);
-    }
+    print("Token saved: $token");
   }
 
-  // ================= LOGOUT STATE ONLY =================
-  Future<void> clearStorage() async {
+
+  Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    clear();
+
+    user.value = null;
+    accessToken.value = null;
+    refreshToken.value = null;
+
+    print("Logged out");
   }
-  Future<void> logout() async {
-  await AuthService().logout();
-  clear(); // your provider reset
-}
 }

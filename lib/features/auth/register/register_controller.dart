@@ -2,7 +2,6 @@ import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/core/routes/app_routes.dart';
 import 'package:barpos/core/widgets/top_notification.dart';
 import 'package:barpos/services/auth_service.dart';
-import 'package:barpos/services/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -52,7 +51,7 @@ class RegisterController extends GetxController {
   }
 
   // REGISTER
-  Future<void> register(BuildContext context) async {
+ Future<void> register(BuildContext context) async {
   final firstName = firstNameController.text.trim();
   final middleName = middleNameController.text.trim();
   final lastName = lastNameController.text.trim();
@@ -93,10 +92,10 @@ class RegisterController extends GetxController {
       roleId: selectedRoleId.value!,
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
+    if (response.isSuccess) {
       TopNotification.show(
         context,
-        message: "Registration successful",
+        message: response.message ?? "Registration successful",
         color: AppColors.primary,
         icon: Icons.check_circle,
       );
@@ -107,7 +106,7 @@ class RegisterController extends GetxController {
     } else {
       TopNotification.show(
         context,
-        message: response.detail,
+        message: response.message ?? "Registration failed",
         color: Colors.redAccent,
         icon: Icons.error_outline,
       );
@@ -123,15 +122,4 @@ class RegisterController extends GetxController {
     isLoading.value = false;
   }
 }
-  @override
-  void onClose() {
-    firstNameController.dispose();
-    middleNameController.dispose();
-    lastNameController.dispose();
-    emailController.dispose();
-    phoneController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    super.onClose();
-  }
 }

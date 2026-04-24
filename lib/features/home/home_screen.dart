@@ -17,86 +17,76 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final navController = Get.find<BottomNavController>();
     final homeController = Get.find<HomeController>();
+    final cartController = homeController.cartController;
 
-    /// 🔹 Pages
     final pages = [
-      /// HOME TAB
       Obx(() {
         return homeController.selectedCounter.value == null
             ? CounterSelectionWidget()
             : CounterItemsWidget();
       }),
 
-      /// CART TAB
       CartScreen(),
-
-      /// ORDERS TAB
       const OrdersScreen(),
-
-      /// PROFILE TAB
       const ProfileScreen(),
     ];
 
     return Scaffold(
-appBar: AppBar(
-  backgroundColor: AppColors.primary,
-  elevation: 0,
-  centerTitle: true,
+      /// APP BAR
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: AppColors.white),
 
-  iconTheme: const IconThemeData(
-    color: AppColors.white, // icons color
-  ),
+        title: Obx(() {
+          final index = navController.currentIndex.value;
 
-  title: Obx(() {
-    final index = navController.currentIndex.value;
+          if (index == 0) {
+            final counter = homeController.selectedCounter.value;
+            return Text(
+              counter == null ? "Select Counter" : "Counter: $counter",
+              style: const TextStyle(
+                color: AppColors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+              ),
+            );
+          }
 
-    String title;
+          const titles = ["Home", "Cart", "Orders", "Profile"];
 
-    if (index == 0) {
-      final counter = homeController.selectedCounter.value;
-      title = counter == null
-          ? "Select Counter"
-          : "Counter: $counter";
-    } else if (index == 1) {
-      title = "Cart";
-    } else if (index == 2) {
-      title = "Orders";
-    } else {
-      title = "Profile";
-    }
+          return Text(
+            titles[index],
+            style: const TextStyle(
+              color: AppColors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+            ),
+          );
+        }),
 
-    return Text(
-      title,
-      style: const TextStyle(
-        color: AppColors.white,
-        fontWeight: FontWeight.w600,
-        fontSize: 18,
-     
+        actions: [
+          Obx(() {
+            final index = navController.currentIndex.value;
+            final counter = homeController.selectedCounter.value;
+
+            if (index == 0 && counter != null) {
+              return IconButton(
+                icon: const Icon(Icons.refresh),
+                color: AppColors.white,
+                onPressed: () {
+                  homeController.selectedCounter.value = null;
+                },
+              );
+            }
+
+            return const SizedBox();
+          }),
+        ],
       ),
-    );
-  }),
 
-  actions: [
-    Obx(() {
-      final index = navController.currentIndex.value;
-      final counter = homeController.selectedCounter.value;
-
-      if (index == 0 && counter != null) {
-        return IconButton(
-          icon: const Icon(Icons.refresh),
-          color: AppColors.white,
-          onPressed: () {
-            homeController.selectedCounter.value = null;
-          },
-        );
-      }
-
-      return const SizedBox();
-    }),
-  ],
-),
-
-      ///  BODY
+      /// BODY
       body: Obx(() {
         return IndexedStack(
           index: navController.currentIndex.value,
@@ -104,30 +94,67 @@ appBar: AppBar(
         );
       }),
 
-      /// BOTTOM NAV
-      bottomNavigationBar: Obx(
-        () => BottomNavigationBar(
+      /// BOTTOM NAVIGATION
+      bottomNavigationBar: Obx(() {
+        final count = cartController.cartCount;
+
+        return BottomNavigationBar(
           currentIndex: navController.currentIndex.value,
           onTap: navController.changeTab,
-
-          selectedItemColor: Colors.blue,
+          selectedItemColor: AppColors.primary,
           unselectedItemColor: Colors.grey,
           type: BottomNavigationBarType.fixed,
 
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          items: [
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: "Home",
+            ),
+
+            /// CART WITH BADGE
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(Icons.shopping_cart),
+
+                  if (count > 0)
+                    Positioned(
+                      right: -6,
+                      top: -6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          "$count",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               label: "Cart",
             ),
-            BottomNavigationBarItem(
+
+            const BottomNavigationBarItem(
               icon: Icon(Icons.receipt_long),
               label: "Orders",
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: "Profile",
+            ),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 }

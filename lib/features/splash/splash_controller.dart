@@ -9,24 +9,24 @@ class SplashController extends GetxController {
   void onInit() {
     super.onInit();
 
-    print("🚀 SplashController initialized");
+    print("SplashController initialized");
 
     _startSplash();
   }
 
   void _startSplash() async {
     try {
-      print("⏳ Splash timer started");
+      print("Splash timer started");
 
       await Future.delayed(const Duration(milliseconds: 1200));
 
-      print("➡️ Navigating to onboarding");
+      print("Navigating to onboarding");
 
       await Future.delayed(Duration.zero); // allows UI frame to settle
 
       Get.offAllNamed(AppRoutes.onboarding);
 
-      print("✅ Navigation executed");
+      print("Navigation executed");
     } catch (e) {
       print("Splash error: $e");
     }

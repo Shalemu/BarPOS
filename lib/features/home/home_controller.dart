@@ -1,44 +1,115 @@
-
+import 'package:barpos/features/cart/cart_controller.dart';
+import 'package:barpos/provider/auth_provider.dart';
+import 'package:barpos/services/counter_service.dart';
+import 'package:barpos/services/model/counters_model.dart';
+import 'package:barpos/services/model/product_model.dart';
+import 'package:barpos/services/product_service.dart';
 import 'package:get/get.dart';
 
-
 class HomeController extends GetxController {
-  var counters = <String>[].obs;
-  var selectedCounter = RxnString();
+  var counters = <CounterModel>[].obs;
+  var selectedCounter = Rxn<CounterModel>();
   var selectedCategory = 0.obs;
+  var products = <ProductModel>[].obs;
+  var isLoadingProducts = false.obs;
+
+  final CounterService _counterService = CounterService();
+  final AuthProvider authProvider = Get.find<AuthProvider>();
+  final CartController cartController = Get.find<CartController>();
 
   @override
   void onInit() {
     super.onInit();
-    loadCounters();
+
+    ever(authProvider.accessToken, (token) {
+      if (token != null && token.isNotEmpty) {
+        print("Token available → loading counters");
+        loadCounters(token);
+      }
+    });
+
+    final existingToken = authProvider.accessToken.value;
+    if (existingToken != null && existingToken.isNotEmpty) {
+      loadCounters(existingToken);
+    }
   }
 
-  void loadCounters() {
-    // Replace with API later
-    counters.value = ["Main Bar", "VIP", "Outdoor"];
+  Future<void> loadCounters(String token) async {
+    try {
+      print("========== LOAD COUNTERS START ==========");
+      print("TOKEN: $token");
+
+      final response = await _counterService.fetchCounters(token);
+
+      print("RESPONSE SUCCESS: ${response.isSuccess}");
+      print("MESSAGE: ${response.message}");
+
+      if (response.isSuccess) {
+        counters.value = (response.data as List)
+            .map((e) => CounterModel.fromJson(e))
+            .toList();
+
+        print("COUNTERS LOADED: ${counters.length}");
+      }
+
+      print("========== LOAD COUNTERS END ==========");
+    } catch (e, stack) {
+      print("ERROR: $e");
+      print(stack);
+
+      _safeSnackbar("Error", e.toString());
+    }
   }
 
-  void selectCounter(String counter) {
+  Future<void> loadProducts(int counterId) async {
+    final token = authProvider.accessToken.value;
+
+    print("TOKEN: $token");
+    print("COUNTER ID: $counterId");
+
+    if (token == null) {
+      print("TOKEN IS NULL");
+      return;
+    }
+
+    final result = await ProductService().fetchCounterProducts(
+      token,
+      counterId,
+    );
+
+    products.value = result;
+
+    print("PRODUCTS LOADED: ${products.length}");
+  }
+
+  void _safeSnackbar(String title, String message) {
+    if (Get.context != null) {
+      Future.delayed(Duration.zero, () {
+        Get.snackbar(title, message);
+      });
+    }
+  }
+
+  void selectCounter(CounterModel counter) {
     selectedCounter.value = counter;
   }
 
-  // Map: productIndex -> quantity
-var quantities = <int, int>{}.obs;
+  var quantities = <int, int>{}.obs;
 
-int getQty(int index) => quantities[index] ?? 0;
+  int getQty(int index) => quantities[index] ?? 0;
 
-void increaseQty(int index) {
-  quantities[index] = getQty(index) + 1;
-}
-
-void decreaseQty(int index) {
-  final current = getQty(index);
-  if (current > 0) {
-    quantities[index] = current - 1;
+  void increaseQty(int index) {
+    quantities[index] = getQty(index) + 1;
   }
-}
 
-void setQty(int index, int value) {
-  quantities[index] = value < 0 ? 0 : value;
-}
+  void decreaseQty(int index) {
+    final current = getQty(index);
+    if (current > 0) {
+      quantities[index] = current - 1;
+    }
+  }
+
+  void setQty(int index, int value) {
+    quantities[index] = value < 0 ? 0 : value;
+  }
 }

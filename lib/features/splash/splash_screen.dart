@@ -15,17 +15,17 @@ class SplashScreen extends GetView<SplashController> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
 
-            /// LOGO
+            //LOGO
             Image.asset(
               'assets/logos/privatech.png',
               height: 85,
               fit: BoxFit.contain,
-              color: Colors.white, // force white look
+              color: Colors.white, 
             ),
 
             const SizedBox(height: 18),
 
-            /// APP NAME
+            //APPLICATION NAME
             const Text(
               "BarPOS",
               style: TextStyle(
@@ -38,7 +38,7 @@ class SplashScreen extends GetView<SplashController> {
 
             const SizedBox(height: 22),
 
-            /// LOADING
+        
             const SizedBox(
               width: 24,
               height: 24,

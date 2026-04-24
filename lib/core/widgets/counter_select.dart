@@ -50,7 +50,6 @@ class CounterSelectionWidget extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            /// ADS / BANNER
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -102,6 +101,7 @@ class CounterSelectionWidget extends StatelessWidget {
 
             //COUNTER CARDS
             Obx(() {
+              
               return GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -118,6 +118,10 @@ class CounterSelectionWidget extends StatelessWidget {
                   return GestureDetector(
                     onTap: () {
                       controller.selectCounter(counter);
+
+                      controller.loadProducts(
+                        counter.id,
+                      ); 
                     },
                     child: Container(
                       padding: const EdgeInsets.all(12),
@@ -135,6 +139,7 @@ class CounterSelectionWidget extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
+                              // ignore: deprecated_member_use
                               color: AppColors.primary.withOpacity(0.2),
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -145,7 +150,7 @@ class CounterSelectionWidget extends StatelessWidget {
 
                           /// COUNTER NAME
                           Text(
-                            counter,
+                            counter.name,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
 

@@ -1,4 +1,5 @@
-import 'package:barpos/services/models/user_model.dart';
+import 'package:barpos/services/model/user_model.dart';
+
 
 class LoginResponseModel {
   final String status;

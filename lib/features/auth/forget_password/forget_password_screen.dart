@@ -3,153 +3,112 @@ import 'package:barpos/features/auth/forget_password/forget_password_controller.
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class ForgotPasswordScreen extends GetView<ForgotPasswordController> {
   const ForgotPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isSmall = size.height < 650;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        centerTitle: true,
-        title: const Text(
-          'Forgot Password',
-          style: TextStyle(color: Colors.white),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      backgroundColor: const Color(0xFFF5F6FA),
+
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              const SizedBox(height: 100),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: size.width * 0.08,
+              vertical: isSmall ? 10 : 30,
+            ),
 
-              SizedBox(
-                height: 160,
-                child: Image.asset('assets/logo/logo.png'),
-              ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
 
-              const SizedBox(height: 30),
+              child: Column(
+                children: [
 
-              TextField(
-                controller: controller.phoneController,
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  prefixIcon: const Icon(Icons.phone),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  SizedBox(height: isSmall ? 10 : 30),
+
+                  /// LOGO
+                  Image.asset(
+                    'assets/logos/privatech.png',
+                    height: 60,
                   ),
-                ),
-              ),
 
-              const SizedBox(height: 20),
+                  const SizedBox(height: 40),
 
-              /// OTP + PASSWORD SECTION
-              Obx(() {
-                if (!controller.otpSent.value) return const SizedBox();
+                  const Text(
+                    'Forgot Password',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
 
-                return Column(
-                  children: [
-                    TextField(
-                      controller: controller.otpController,
-                      decoration: InputDecoration(
-                        labelText: 'OTP Code',
-                        prefixIcon: const Icon(Icons.lock_open),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 25),
+
+                  /// CARD
+                  Container(
+                    padding: const EdgeInsets.all(25),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      children: [
+
+                        /// EMAIL INPUT
+                        TextField(
+                          controller: controller.emailController,
+                          decoration: InputDecoration(
+                            labelText: 'Email Address',
+                            prefixIcon: const Icon(Icons.email),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
 
-                    Obx(() => TextField(
-                          controller:
-                              controller.newPasswordController,
-                          obscureText:
-                              controller.obscureNew.value,
-                          decoration: InputDecoration(
-                            labelText: 'New Password',
-                            prefixIcon: const Icon(Icons.lock),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                controller.obscureNew.value
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                              ),
-                              onPressed:
-                                  controller.toggleNewPassword,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(12),
-                            ),
+                        const SizedBox(height: 25),
+
+                        /// BUTTON
+                        Obx(
+                          () => SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: controller.isLoading.value
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : ElevatedButton(
+                                   onPressed: () => controller.sendCodeToEmail(context),
+                                        
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Send Verification Code',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                           ),
-                        )),
-
-                    const SizedBox(height: 20),
-
-                    Obx(() => TextField(
-                          controller:
-                              controller.confirmPasswordController,
-                          obscureText:
-                              controller.obscureConfirm.value,
-                          decoration: InputDecoration(
-                            labelText: 'Confirm Password',
-                            prefixIcon:
-                                const Icon(Icons.lock_reset),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                controller.obscureConfirm.value
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                              ),
-                              onPressed:
-                                  controller.toggleConfirmPassword,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(12),
-                            ),
-                          ),
-                        )),
-
-                    const SizedBox(height: 30),
-                  ],
-                );
-              }),
-
-              /// BUTTON
-              Obx(() => SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : controller.otpSent.value
-                              ? controller.resetPassword
-                              : controller.requestOtp,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 15),
-                      ),
-                      child: controller.isLoading.value
-                          ? const CircularProgressIndicator(
-                              color: Colors.white)
-                          : Text(
-                              controller.otpSent.value
-                                  ? 'Reset Password'
-                                  : 'Request OTP',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                        ),
+                      ],
                     ),
-                  )),
-            ],
+                  ),
+
+                  SizedBox(height: isSmall ? 20 : 40),
+                ],
+              ),
+            ),
           ),
         ),
       ),
