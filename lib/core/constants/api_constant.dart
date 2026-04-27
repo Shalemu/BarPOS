@@ -4,6 +4,7 @@ class ApiConstants {
 
   //AUTH 
   static const String login = "$baseUrl/login";
+  static const String logout = "$baseUrl/logout";
   static const String registration = "$baseUrl/register/";
   static const String roles = "$baseUrl/roles/";
 
@@ -19,5 +20,7 @@ class ApiConstants {
 
   // productlist
   static const String fetchProducts = "$baseUrl/counters";
+
+  static const String submitOrder = "$baseUrl/orders/collect";
   
 }

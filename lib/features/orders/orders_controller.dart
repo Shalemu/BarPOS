@@ -1,27 +1,37 @@
 import 'package:get/get.dart';
+import 'package:barpos/provider/auth_provider.dart';
+import 'package:barpos/services/order_service.dart';
 
 class OrdersController extends GetxController {
-  var isLoading = false.obs;
+  final isLoading = false.obs;
+  final OrderService _service = OrderService();
 
   var orders = <Map<String, dynamic>>[].obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchOrders();
-  }
+  Future<String?> submitOrder({
+    required String tableRef,
+    required List<Map<String, dynamic>> items,
+  }) async {
+    final auth = Get.find<AuthProvider>();
+    final counter = auth.selectedCounter.value;
 
-  void fetchOrders() async {
+    if (counter == null) {
+      return "Please select counter first";
+    }
+
     try {
       isLoading.value = true;
 
-      await Future.delayed(const Duration(seconds: 1));
+      await _service.submitOrder(
+        token: auth.accessToken.value!,
+        counterId: counter.id,
+        tableRef: tableRef,
+        items: items,
+      );
 
-      // EMPTY by default (no fake data)
-      orders.clear();
-
+      return null;
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      return e.toString();
     } finally {
       isLoading.value = false;
     }

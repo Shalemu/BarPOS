@@ -12,85 +12,111 @@ class CounterItemsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<HomeController>();
 
-    final categories = ["All", "Food", "Beer", "Spirits", "Soft Drinks"];
-
     return Column(
       children: [
         const SizedBox(height: 20),
 
-        /// SEARCH BAR
+        // SEARCH BAR
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            height: 45,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.search, color: Colors.grey),
-                SizedBox(width: 8),
-                Text("Search menu...", style: TextStyle(color: Colors.grey)),
-              ],
+          child: TextField(
+            onChanged: (value) => controller.searchQuery.value = value,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search),
+              hintText: "Search product...",
+              filled: true,
+              fillColor: Colors.grey.shade100,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
         ),
-
         const SizedBox(height: 12),
 
-        /// CATEGORIES
-        SizedBox(
-          height: 40,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              return Obx(() {
-                final selected = controller.selectedCategory.value == index;
+        // CATEGORY FILTER
+        Obx(() {
+          final categories = controller.categories;
+
+          return SizedBox(
+            height: 42,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+
+                final isSelected =
+                    controller.selectedCategory.value.toLowerCase().trim() ==
+                    category.toLowerCase().trim();
 
                 return GestureDetector(
-                  onTap: () => controller.selectedCategory.value = index,
-                  child: Container(
+                  onTap: () {
+                    controller.changeCategory(category);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+
                     margin: const EdgeInsets.only(right: 10),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
+
                     decoration: BoxDecoration(
-                      color: selected ? Colors.black : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(16),
+                      color: isSelected ? Colors.black : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(10),
+
+                      border: isSelected
+                          ? Border.all(color: Colors.black, width: 1)
+                          : null,
+
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ]
+                          : [],
                     ),
+
                     alignment: Alignment.center,
+
                     child: Text(
-                      categories[index],
+                      category,
                       style: TextStyle(
-                        color: selected ? Colors.white : Colors.black,
+                        color: isSelected ? Colors.white : Colors.black87,
                         fontSize: 13,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
                 );
-              });
-            },
-          ),
-        ),
+              },
+            ),
+          );
+        }),
 
         const SizedBox(height: 12),
 
-        /// PRODUCTS GRID
+        // PRODUCTS GRID
         Expanded(
           child: Obx(() {
             if (controller.isLoadingProducts.value) {
               return const Center(child: DotLoader());
             }
-            if (controller.products.isEmpty) {
+
+            if (controller.filteredProducts.isEmpty) {
               return const Center(child: Text("No products found"));
             }
 
             return GridView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: controller.products.length,
+              itemCount: controller.filteredProducts.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 0.72,
@@ -98,7 +124,7 @@ class CounterItemsWidget extends StatelessWidget {
                 mainAxisSpacing: 12,
               ),
               itemBuilder: (context, index) {
-                final item = controller.products[index];
+                final item = controller.filteredProducts[index];
 
                 return Container(
                   decoration: BoxDecoration(
@@ -115,7 +141,7 @@ class CounterItemsWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// IMAGE
+                      // IMAGE
                       ClipRRect(
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(18),
@@ -133,13 +159,12 @@ class CounterItemsWidget extends StatelessWidget {
                         ),
                       ),
 
-                      /// CONTENT
+                      // CONTENT
                       Padding(
                         padding: const EdgeInsets.all(10),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            /// NAME
                             Text(
                               item.name,
                               maxLines: 1,
@@ -152,7 +177,6 @@ class CounterItemsWidget extends StatelessWidget {
 
                             const SizedBox(height: 4),
 
-                            /// PRICE
                             Text(
                               "TZS ${item.price}",
                               style: TextStyle(
@@ -164,7 +188,6 @@ class CounterItemsWidget extends StatelessWidget {
 
                             const SizedBox(height: 4),
 
-                            /// STOCK
                             Text(
                               "Available: ${item.availableQty}",
                               style: TextStyle(
@@ -185,6 +208,7 @@ class CounterItemsWidget extends StatelessWidget {
 
                             const SizedBox(height: 10),
 
+                            // CART CONTROLS
                             Obx(() {
                               final cartController = Get.find<CartController>();
 
@@ -193,7 +217,6 @@ class CounterItemsWidget extends StatelessWidget {
 
                               final qty = cartItem?.quantity ?? 0;
 
-                              ///  ADD BUTTON
                               if (qty == 0) {
                                 return GestureDetector(
                                   onTap: () {
@@ -230,7 +253,6 @@ class CounterItemsWidget extends StatelessWidget {
                                 );
                               }
 
-                              /// ➖ + QTY CONTROL
                               return Container(
                                 height: 36,
                                 decoration: BoxDecoration(
@@ -239,17 +261,11 @@ class CounterItemsWidget extends StatelessWidget {
                                 ),
                                 child: Row(
                                   children: [
-                                    /// MINUS
                                     Material(
                                       color: Colors.transparent,
                                       child: InkWell(
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          bottomLeft: Radius.circular(10),
-                                        ),
-                                        onTap: () {
-                                          cartController.decreaseQty(item.id);
-                                        },
+                                        onTap: () =>
+                                            cartController.decreaseQty(item.id),
                                         child: const SizedBox(
                                           width: 36,
                                           height: 36,
@@ -258,35 +274,23 @@ class CounterItemsWidget extends StatelessWidget {
                                       ),
                                     ),
 
-                                    /// QTY
                                     Expanded(
                                       child: Center(
                                         child: Text(
                                           "$qty",
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
-                                            fontSize: 14,
                                           ),
                                         ),
                                       ),
                                     ),
 
-                                    /// PLUS
                                     Material(
                                       color: Colors.black,
                                       child: InkWell(
-                                        borderRadius: const BorderRadius.only(
-                                          topRight: Radius.circular(10),
-                                          bottomRight: Radius.circular(10),
-                                        ),
                                         onTap: () {
-                                          final product = controller.products
-                                              .firstWhere(
-                                                (p) => p.id == item.id,
-                                              );
-
                                           final msg = cartController
-                                              .increaseQty(item.id, product);
+                                              .increaseQty(item.id, item);
 
                                           if (msg != null) {
                                             Get.snackbar(

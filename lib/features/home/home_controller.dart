@@ -7,75 +7,146 @@ import 'package:barpos/services/product_service.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
+
+  // DATA
+
   var counters = <CounterModel>[].obs;
-  var selectedCounter = Rxn<CounterModel>();
-  var selectedCategory = 0.obs;
   var products = <ProductModel>[].obs;
+
+  var selectedCounter = Rxn<CounterModel>();
+
   var isLoadingProducts = false.obs;
   var isLoadingCounters = false.obs;
+
+  var selectedCategory = "All".obs;
+  var searchQuery = "".obs;
+
+
+  // DEPENDENCIES
 
   final CounterService _counterService = CounterService();
   final AuthProvider authProvider = Get.find<AuthProvider>();
   final CartController cartController = Get.find<CartController>();
 
+
+  // USER INFO
+
+  String get userName =>
+      authProvider.user.value?.firstName ?? "User";
+
+ 
+  // INIT
+ 
   @override
   void onInit() {
     super.onInit();
 
     ever(authProvider.accessToken, (token) {
       if (token != null && token.isNotEmpty) {
-        print("Token available → loading counters");
         loadCounters(token);
       }
     });
 
-    final existingToken = authProvider.accessToken.value;
-    if (existingToken != null && existingToken.isNotEmpty) {
-      loadCounters(existingToken);
+    final token = authProvider.accessToken.value;
+    if (token != null && token.isNotEmpty) {
+      loadCounters(token);
     }
   }
+
+
+  // LOAD COUNTERS
 
   Future<void> loadCounters(String token) async {
-  try {
-    isLoadingCounters.value = true;
+    try {
+      isLoadingCounters.value = true;
 
-    print("========== LOAD COUNTERS START ==========");
+      final response = await _counterService.fetchCounters(token);
 
-    final response = await _counterService.fetchCounters(token);
-
-    if (response.isSuccess) {
-      counters.value = (response.data as List)
-          .map((e) => CounterModel.fromJson(e))
-          .toList();
+      if (response.isSuccess) {
+        counters.value = (response.data as List)
+            .map((e) => CounterModel.fromJson(e))
+            .toList();
+      }
+    } catch (e) {
+      _safeSnackbar("Error", e.toString());
+    } finally {
+      isLoadingCounters.value = false;
     }
-
-    print("========== LOAD COUNTERS END ==========");
-  } catch (e) {
-    _safeSnackbar("Error", e.toString());
-  } finally {
-    isLoadingCounters.value = false;
   }
+
+  
+  // LOAD PRODUCTS
+ 
+  Future<void> loadProducts(int counterId) async {
+    try {
+      isLoadingProducts.value = true;
+
+      final token = authProvider.accessToken.value;
+      if (token == null || token.isEmpty) return;
+
+      final result = await ProductService().fetchCounterProducts(
+        token,
+        counterId,
+      );
+
+      products.value = result;
+
+      // reset filters
+      selectedCategory.value = "All";
+      searchQuery.value = "";
+    } catch (e) {
+      _safeSnackbar("Error", e.toString());
+    } finally {
+      isLoadingProducts.value = false;
+    }
+  }
+
+ 
+  // CATEGORIES (DYNAMIC)
+ 
+  List<String> get categories {
+    final set = products.map((e) => e.category).toSet().toList();
+    return ["All", ...set];
+  }
+
+  
+  // FILTERED PRODUCTS
+  
+  List<ProductModel> get filteredProducts {
+    return products.where((product) {
+      
+      final matchCategory = selectedCategory.value == "All"
+          ? true
+          : product.category.toLowerCase().trim() ==
+              selectedCategory.value.toLowerCase().trim();
+
+      
+      final query = searchQuery.value.toLowerCase().trim();
+      final name = product.name.toLowerCase();
+
+      final matchSearch = query.isEmpty
+          ? true
+          : name.contains(query) || name.startsWith(query);
+
+      return matchCategory && matchSearch;
+    }).toList();
+  }
+
+  void changeCategory(String category) {
+  selectedCategory.value = category;
+  products.refresh(); 
 }
 
- Future<void> loadProducts(int counterId) async {
-  try {
-    isLoadingProducts.value = true;
-
-    final token = authProvider.accessToken.value;
-
-    if (token == null) return;
-
-    final result = await ProductService()
-        .fetchCounterProducts(token, counterId);
-
-    products.value = result;
-  } catch (e) {
-    _safeSnackbar("Error", e.toString());
-  } finally {
-    isLoadingProducts.value = false;
+ 
+  //SELECT COUNTER
+  
+  void selectCounter(CounterModel counter) {
+    selectedCounter.value = counter;
   }
-}
 
+ 
+  // SNACKBAR SAFE
+ 
   void _safeSnackbar(String title, String message) {
     if (Get.context != null) {
       Future.delayed(Duration.zero, () {
@@ -84,26 +155,25 @@ class HomeController extends GetxController {
     }
   }
 
-  void selectCounter(CounterModel counter) {
-    selectedCounter.value = counter;
-  }
+  
+  // CART QUANTITY SYSTEM
 
   var quantities = <int, int>{}.obs;
 
-  int getQty(int index) => quantities[index] ?? 0;
+  int getQty(int id) => quantities[id] ?? 0;
 
-  void increaseQty(int index) {
-    quantities[index] = getQty(index) + 1;
+  void increaseQty(int id) {
+    quantities[id] = getQty(id) + 1;
   }
 
-  void decreaseQty(int index) {
-    final current = getQty(index);
+  void decreaseQty(int id) {
+    final current = getQty(id);
     if (current > 0) {
-      quantities[index] = current - 1;
+      quantities[id] = current - 1;
     }
   }
 
-  void setQty(int index, int value) {
-    quantities[index] = value < 0 ? 0 : value;
+  void setQty(int id, int value) {
+    quantities[id] = value < 0 ? 0 : value;
   }
 }

@@ -9,10 +9,8 @@ class CartController extends GetxController {
   String? addToCart(ProductModel product) {
     final index = cartItems.indexWhere((e) => e.id == product.id);
 
-    // STOCK CHECK (ONLY FOR PRODUCT CATEGORY)
-    if (product.category == "product") {
-      final currentQty =
-          index != -1 ? cartItems[index].quantity : 0;
+    if (product.category.toLowerCase() == "product") {
+      final currentQty = index != -1 ? cartItems[index].quantity : 0;
 
       if (currentQty >= product.availableQty) {
         return "Only ${product.availableQty} items available";
@@ -45,7 +43,7 @@ class CartController extends GetxController {
 
     final item = cartItems[index];
 
-    if (product.category == "product") {
+    if (product.category.toLowerCase() == "product") {
       if (item.quantity >= product.availableQty) {
         return "Only ${product.availableQty} items available";
       }
@@ -77,4 +75,11 @@ class CartController extends GetxController {
   /// CART COUNT
   int get cartCount =>
       cartItems.fold(0, (sum, item) => sum + item.quantity);
+
+  /// CLEAR CART
+  void clearCart() {
+    cartItems.clear();
+  }
+
+  
 }

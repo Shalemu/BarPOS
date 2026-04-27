@@ -2,8 +2,6 @@ import 'package:barpos/features/auth/forget_password/forget_password.binding.dar
 import 'package:barpos/features/auth/forget_password/forget_password_screen.dart';
 import 'package:barpos/features/auth/forget_password/reset_password_screen.dart';
 import 'package:barpos/features/auth/forget_password/verify-email.dart';
-import 'package:barpos/features/onboarding/onboarding_binding.dart';
-import 'package:barpos/features/onboarding/onboarding_screen.dart';
 import 'package:barpos/features/splash/splash_binding.dart';
 import 'package:barpos/features/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -87,6 +85,14 @@ class AppPages {
       name: AppRoutes.cart,
       page: () => CartScreen(),
       binding: CartBinding(),
+    ),
+
+    // ORDERS
+    // CART
+    GetPage(
+      name: AppRoutes.cart,
+      page: () => CartScreen(),
+      bindings: [CartBinding(), OrdersBinding()],
     ),
 
     // ORDERS

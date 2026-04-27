@@ -1,3 +1,5 @@
+import 'package:barpos/services/model/counters_model.dart';
+
 class UserModel {
   final String firstName;
   final String middleName;
@@ -6,6 +8,7 @@ class UserModel {
   final String email;
   final String userType;
   final String token;
+  final CounterModel counter;
 
   UserModel({
     required this.firstName,
@@ -15,6 +18,7 @@ class UserModel {
     required this.email,
     required this.userType,
     required this.token,
+    required this.counter,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,9 @@ class UserModel {
       email: json["email"] ?? "",
       userType: json["userType"] ?? "",
       token: json["token"] ?? "",
+
+    
+      counter: CounterModel.fromJson(json["counter"] ?? {}),
     );
   }
 
@@ -38,6 +45,12 @@ class UserModel {
       "email": email,
       "userType": userType,
       "token": token,
+
+      // optional
+      "counter": {
+        "id": counter.id,
+        "name": counter.name,
+      },
     };
   }
 }

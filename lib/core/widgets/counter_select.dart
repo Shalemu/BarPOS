@@ -18,9 +18,9 @@ class CounterSelectionWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             //GREETING
-            const Text(
-              "Hi Shadrack!",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Text(
+              "Hi! ${controller.userName}",
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
             Row(
@@ -105,9 +105,7 @@ class CounterSelectionWidget extends StatelessWidget {
               if (controller.isLoadingCounters.value) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Center(
-                    child: DotLoader(), 
-                  ),
+                  child: Center(child: DotLoader()),
                 );
               }
 

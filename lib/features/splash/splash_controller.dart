@@ -13,6 +13,6 @@ class SplashController extends GetxController {
   void _navigate() async {
     await Future.delayed(const Duration(seconds: 3));
 
-    Get.offAllNamed(AppRoutes.login); // 🔥 correct GetX navigation
+    Get.offAllNamed(AppRoutes.login); 
   }
 }

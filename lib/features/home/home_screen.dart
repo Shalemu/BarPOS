@@ -44,8 +44,9 @@ class HomeScreen extends StatelessWidget {
 
           if (index == 0) {
             final counter = homeController.selectedCounter.value;
+
             return Text(
-              counter == null ? "Select Counter" : "Counter: $counter",
+              counter == null ? "Select Counter" : "Counter: ${counter.name}",
               style: const TextStyle(
                 color: AppColors.white,
                 fontWeight: FontWeight.w600,

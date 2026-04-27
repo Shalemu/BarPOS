@@ -1,5 +1,7 @@
 import 'package:barpos/core/constants/app_colors.dart';
+import 'package:barpos/core/widgets/top_notification.dart';
 import 'package:barpos/features/home/home_controller.dart';
+import 'package:barpos/features/orders/orders_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'cart_controller.dart';
@@ -9,6 +11,8 @@ class CartScreen extends StatelessWidget {
 
   final CartController controller = Get.find<CartController>();
   final HomeController homeController = Get.find<HomeController>();
+  final OrdersController ordersController = Get.find<OrdersController>();
+  final TextEditingController tableController = TextEditingController();
 
 
   @override
@@ -196,70 +200,199 @@ class CartScreen extends StatelessWidget {
               },
             ),
 
-            /// CHECKOUT BAR (LIKE IMAGE)
+            /// CHECKOUT BAR (PREMIUM UI)
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+                  border: Border(
+                    top: BorderSide(color: Color(0xFFE5E7EB), width: 0.8),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 20,
+                      offset: Offset(0, -4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    /// TOTAL
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Total:",
-                          style: TextStyle(fontSize: 15, color: Colors.grey),
-                        ),
-                        Obx(
-                          () => Text(
-                            "TZS ${controller.totalPrice.toStringAsFixed(0)}",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                    /// TOTAL ROW (PREMIUM)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Total Amount",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
+                          Obx(
+                            () => Text(
+                              "TZS ${controller.totalPrice.toStringAsFixed(0)}",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    /// INPUT FIELD (PREMIUM)
+                    TextField(
+                      controller: tableController,
+                      style: const TextStyle(fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: "Table number / reference",
+                        prefixIcon: const Icon(
+                          Icons.table_bar_outlined,
+                          size: 20,
                         ),
-                      ],
+                        filled: true,
+                        fillColor: const Color(0xFFF3F4F6),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Colors.black,
+                            width: 1,
+                          ),
+                        ),
+                      ),
                     ),
 
                     const SizedBox(height: 14),
 
-                    /// CHECKOUT BUTTON (GREEN FULL WIDTH)
+                    /// BUTTON (PREMIUM)
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // submit order
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            20,
-                            20,
-                            20,
+                      height: 52,
+                      child: Obx(() {
+                        final loading = ordersController.isLoading.value;
+
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(14),
+                            gradient: loading
+                                ? null
+                                : const LinearGradient(
+                                    colors: [
+                                      Color(0xFF111827),
+                                      Color(0xFF1F2937),
+                                    ],
+                                  ),
+                            color: loading ? Colors.grey.shade300 : null,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                          child: ElevatedButton(
+                            onPressed: loading
+                                ? null
+                                : () async {
+                                    final tableRef = tableController.text
+                                        .trim();
+
+                                    if (tableRef.isEmpty) {
+                                      TopNotification.show(
+                                        context,
+                                        message: "Table reference required",
+                                        color: Colors.red,
+                                        icon: Icons.error,
+                                      );
+                                      return;
+                                    }
+
+                                    final items = controller.cartItems.map((
+                                      item,
+                                    ) {
+                                      return {
+                                        "itemId": item.id,
+                                        "itemCategory": item.category,
+                                        "itemQty": item.quantity,
+                                      };
+                                    }).toList();
+
+                                    final result = await ordersController
+                                        .submitOrder(
+                                          tableRef: tableRef,
+                                          items: items,
+                                        );
+
+                                    if (result == null) {
+                                      controller.clearCart();
+                                      tableController.clear();
+
+                                      TopNotification.show(
+                                        context,
+                                        message: "Order placed successfully",
+                                        color: Colors.green,
+                                        icon: Icons.check_circle,
+                                      );
+                                    } else {
+                                      TopNotification.show(
+                                        context,
+                                        message: result,
+                                        color: Colors.red,
+                                        icon: Icons.error,
+                                      );
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: loading
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.black,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    "SUBMIT ORDER",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
                           ),
-                        ),
-                        child: const Text(
-                          "SUBMIT ORDER",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ),
+                        );
+                      }),
                     ),
                   ],
                 ),

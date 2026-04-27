@@ -1,21 +1,38 @@
-import 'package:barpos/features/auth/login/auth_controller.dart';
-import 'package:barpos/features/cart/cart_controller.dart';
-import 'package:barpos/features/orders/orders_controller.dart';
-import 'package:barpos/features/profile/profile_controller.dart';
-import 'package:barpos/provider/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'core/routes/app_pages.dart';
 import 'core/routes/app_routes.dart';
 
-void main() {
+import 'provider/auth_provider.dart';
+import 'features/auth/login/auth_controller.dart';
+import 'features/cart/cart_controller.dart';
+import 'features/orders/orders_controller.dart';
+import 'features/profile/profile_controller.dart';
+import 'features/home/home_controller.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    // PROVIDER FIRST
+    final authProvider = Get.put(AuthProvider(), permanent: true);
+
+    // CONTROLLERS
     Get.put(AuthController(), permanent: true);
-     Get.put(AuthProvider(), permanent: true);
     Get.put(CartController(), permanent: true);
-    // Get.put(CartsController(), permanent: true);
     Get.put(ProfileController(), permanent: true);
     Get.put(OrdersController(), permanent: true);
- 
+    Get.put(HomeController(), permanent: true);
+
+    // LOAD SAVED DATA
+    await authProvider.loadFromPrefs();
+
+  } catch (e, s) {
+    print("STARTUP ERROR: $e");
+    print(s);
+  }
+
   runApp(const MyApp());
 }
 
@@ -25,14 +42,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      debugShowCheckedModeBanner: false, 
+      debugShowCheckedModeBanner: false,
 
       initialRoute: AppRoutes.splashScreen,
+      getPages: AppPages.pages,
 
-    
-    getPages: AppPages.pages,
-
-  
+      defaultTransition: Transition.fade,
     );
   }
 }
