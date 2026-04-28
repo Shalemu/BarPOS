@@ -1,6 +1,6 @@
 import 'package:barpos/core/constants/app_colors.dart';
-import 'package:barpos/features/addItem/add_items_screen.dart';
 import 'package:barpos/features/orders/orders_controller.dart';
+import 'package:barpos/services/model/order_item.dart';
 import 'package:flutter/material.dart';
 import 'package:barpos/core/widgets/progress.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -25,7 +25,9 @@ class _OrderCardState extends State<OrderCard> {
 
     final orderId = order['orderRef'] ?? order['orderId'];
     final status = (order['orderStatus'] ?? "pending").toString().toLowerCase();
-    final items = (order['items'] ?? []) as List;
+    final List<OrderItem> items = (order['items'] ?? []).map<OrderItem>((e) {
+      return OrderItem.fromJson(e);
+    }).toList();
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -138,7 +140,13 @@ class _OrderCardState extends State<OrderCard> {
                     onPressed: () {
                       final orderId = order['orderId'];
 
-                      Get.toNamed('/add-items', arguments: order);
+                      Get.toNamed('/add-items', arguments: order)?.then((
+                        result,
+                      ) {
+                        if (result == true) {
+                          Get.find<OrdersController>().fetchOrders();
+                        }
+                      });
 
                       print("Opening Add Items for Order: $orderId");
                     },
@@ -205,8 +213,8 @@ class _OrderCardState extends State<OrderCard> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("${item['itemName']} x${item['itemQty']}"),
-                    Text("TZS ${item['itemPrice']}"),
+                    Text("${item.name} x${item.qty}"),
+                    Text("TZS ${item.price}"),
                   ],
                 ),
               );
@@ -236,13 +244,13 @@ class _OrderCardState extends State<OrderCard> {
     );
   }
 
-  double _calculateTotal(List items) {
-    double total = 0;
-    for (var item in items) {
-      total += (item['itemPrice'] ?? 0) * (item['itemQty'] ?? 0);
-    }
-    return total;
+double _calculateTotal(List<OrderItem> items) {
+  double total = 0;
+  for (var item in items) {
+    total += item.price * item.qty;
   }
+  return total;
+}
 
   Color _statusColor(String status) {
     switch (status) {

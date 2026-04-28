@@ -33,6 +33,7 @@ class AddItemsController extends GetxController {
             logo: item['itemLogo'] ?? '',
             price: (item['itemPrice'] ?? 0).toDouble(),
             qty: item['itemQty'] ?? 1,
+            category: item['itemCategory'] ?? 'product',
           ),
         );
       }

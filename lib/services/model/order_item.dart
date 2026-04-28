@@ -4,6 +4,7 @@ class OrderItem {
   final String logo;
   final double price;
   final int qty;
+  final String category; 
 
   OrderItem({
     required this.id,
@@ -11,9 +12,9 @@ class OrderItem {
     required this.logo,
     required this.price,
     required this.qty,
+    required this.category,
   });
 
-  /// from API / Map
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
       id: json['itemId'],
@@ -21,27 +22,28 @@ class OrderItem {
       logo: json['itemLogo'] ?? '',
       price: (json['itemPrice'] ?? 0).toDouble(),
       qty: json['itemQty'] ?? 1,
+      category: json['itemCategory'] ?? 'product', 
     );
   }
 
-  /// convert back for API submit
   Map<String, dynamic> toJson() {
     return {
       "itemId": id,
       "itemName": name,
+      "itemCategory": category, 
       "itemLogo": logo,
       "itemPrice": price,
       "itemQty": qty,
     };
   }
 
-  /// copyWith (VERY useful for updates)
   OrderItem copyWith({
     int? id,
     String? name,
     String? logo,
     double? price,
     int? qty,
+    String? category,
   }) {
     return OrderItem(
       id: id ?? this.id,
@@ -49,6 +51,7 @@ class OrderItem {
       logo: logo ?? this.logo,
       price: price ?? this.price,
       qty: qty ?? this.qty,
+      category: category ?? this.category,
     );
   }
 }
