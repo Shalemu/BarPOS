@@ -1,5 +1,6 @@
 import 'package:barpos/features/cart/cart_controller.dart';
 import 'package:barpos/provider/auth_provider.dart';
+import 'package:barpos/provider/counter_provider.dart';
 import 'package:barpos/services/counter_service.dart';
 import 'package:barpos/services/model/counters_model.dart';
 import 'package:barpos/services/model/product_model.dart';
@@ -21,12 +22,15 @@ class HomeController extends GetxController {
   var selectedCategory = "All".obs;
   var searchQuery = "".obs;
 
+  var orders = <Map<String, dynamic>>[].obs;
+  var isLoadingOrders = false.obs;
 
   // DEPENDENCIES
 
   final CounterService _counterService = CounterService();
   final AuthProvider authProvider = Get.find<AuthProvider>();
   final CartController cartController = Get.find<CartController>();
+  final CounterProvider counterProvider = Get.find<CounterProvider>();
 
 
   // USER INFO
@@ -77,29 +81,40 @@ class HomeController extends GetxController {
   
   // LOAD PRODUCTS
  
-  Future<void> loadProducts(int counterId) async {
-    try {
-      isLoadingProducts.value = true;
+Future<void> loadProducts([int? counterId]) async {
+  try {
+    isLoadingProducts.value = true;
 
-      final token = authProvider.accessToken.value;
-      if (token == null || token.isEmpty) return;
+    final token = authProvider.accessToken.value;
+    if (token == null || token.isEmpty) return;
 
-      final result = await ProductService().fetchCounterProducts(
-        token,
-        counterId,
-      );
+    final id = counterId ?? counterProvider.selectedCounterId.value;
 
-      products.value = result;
+   
+    print("PARAM COUNTER ID: $counterId");
+    print("PROVIDER COUNTER ID: ${counterProvider.selectedCounterId.value}");
+    print("FINAL USED ID: $id");
 
-      // reset filters
-      selectedCategory.value = "All";
-      searchQuery.value = "";
-    } catch (e) {
-      _safeSnackbar("Error", e.toString());
-    } finally {
-      isLoadingProducts.value = false;
+    if (id == null) {
+      _safeSnackbar("Error", "No counter selected");
+      return;
     }
+
+    final result = await ProductService().fetchCounterProducts(
+      token,
+      id,
+    );
+
+    products.value = result;
+
+    selectedCategory.value = "All";
+    searchQuery.value = "";
+  } catch (e) {
+    _safeSnackbar("Error", e.toString());
+  } finally {
+    isLoadingProducts.value = false;
   }
+}
 
  
   // CATEGORIES (DYNAMIC)
@@ -142,6 +157,8 @@ class HomeController extends GetxController {
   
   void selectCounter(CounterModel counter) {
     selectedCounter.value = counter;
+
+     counterProvider.setCounter(counter);
   }
 
  

@@ -1,5 +1,7 @@
+import 'package:barpos/provider/counter_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'core/routes/app_pages.dart';
 import 'core/routes/app_routes.dart';
@@ -17,22 +19,25 @@ Future<void> main() async {
   try {
     // PROVIDER FIRST
     final authProvider = Get.put(AuthProvider(), permanent: true);
-
+    Get.put(CounterProvider());
+    
     // CONTROLLERS
     Get.put(AuthController(), permanent: true);
     Get.put(CartController(), permanent: true);
     Get.put(ProfileController(), permanent: true);
     Get.put(OrdersController(), permanent: true);
     Get.put(HomeController(), permanent: true);
+   
 
     // LOAD SAVED DATA
     await authProvider.loadFromPrefs();
-
+  
   } catch (e, s) {
     print("STARTUP ERROR: $e");
     print(s);
   }
 
+  await GetStorage.init(); 
   runApp(const MyApp());
 }
 

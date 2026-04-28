@@ -22,5 +22,7 @@ class ApiConstants {
   static const String fetchProducts = "$baseUrl/counters";
 
   static const String submitOrder = "$baseUrl/orders/collect";
+  static const String fetchOrder = "$baseUrl/orders/my-orders";
+  static const String cancelOrder = "$baseUrl/orders";
   
 }

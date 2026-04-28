@@ -1,3 +1,5 @@
+import 'package:barpos/features/addItem/add_items_binding.dart';
+import 'package:barpos/features/addItem/add_items_screen.dart';
 import 'package:barpos/features/auth/forget_password/forget_password.binding.dart';
 import 'package:barpos/features/auth/forget_password/forget_password_screen.dart';
 import 'package:barpos/features/auth/forget_password/reset_password_screen.dart';
@@ -108,5 +110,11 @@ class AppPages {
       page: () => const ProfileScreen(),
       binding: ProfileBinding(),
     ),
+
+GetPage(
+  name: '/add-items',
+  page: () => const AddItemsScreen(),
+  binding: AddItemsBinding(),
+),
   ];
 }
