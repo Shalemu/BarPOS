@@ -46,12 +46,13 @@ class ProgressTracker extends StatelessWidget {
         _line(1, current),
         _step("Ready", 2, current),
         _line(2, current),
-        _step("Done", 3, current),
+        _step("Completed", 3, current),
+        // _step("Done", 3, current),
       ],
     );
   }
 
-  /// NORMAL STEP
+ 
   Widget _step(String label, int index, int current) {
     final isActive = index == current;
     final isDone = index < current;
@@ -94,7 +95,7 @@ class ProgressTracker extends StatelessWidget {
     );
   }
 
-  /// CANCELLED STATE (REPLACES ENTIRE TRACKER)
+ 
   Widget _cancelledStep() {
     return Row(
       children: [

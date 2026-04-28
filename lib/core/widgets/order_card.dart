@@ -6,6 +6,7 @@ import 'package:barpos/core/widgets/progress.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:intl/intl.dart';
 
 class OrderCard extends StatefulWidget {
   final Map<String, dynamic> order;
@@ -16,12 +17,37 @@ class OrderCard extends StatefulWidget {
   State<OrderCard> createState() => _OrderCardState();
 }
 
+Color getCounterColor(String name) {
+  final colors = [
+    AppColors.primary,
+    AppColors.blue,
+    AppColors.blackshade,
+    AppColors.lightblueshade,
+    AppColors.grayshade,
+  ];
+
+  final index = name.hashCode % colors.length;
+  return colors[index.abs()];
+}
+
+String formatDate(String? dateStr) {
+  if (dateStr == null || dateStr.isEmpty) return "-";
+
+  final date = DateTime.tryParse(dateStr);
+  if (date == null) return "-";
+
+  return DateFormat("dd MMM yyyy  [HH:mm]").format(date.toLocal());
+}
+
 class _OrderCardState extends State<OrderCard> {
   bool expanded = false;
 
   @override
   Widget build(BuildContext context) {
     final order = widget.order;
+
+    final counter = order['counter'] as Map<String, dynamic>?;
+    final counterName = counter?['counterName'] ?? 'N/A';
 
     final orderId = order['orderRef'] ?? order['orderId'];
     final status = (order['orderStatus'] ?? "pending").toString().toLowerCase();
@@ -56,6 +82,14 @@ class _OrderCardState extends State<OrderCard> {
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
+                ),
+              ),
+              Text(
+                counterName,
+                style: TextStyle(
+                  color: getCounterColor(counterName),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
 
@@ -106,7 +140,7 @@ class _OrderCardState extends State<OrderCard> {
               ),
               onPressed: () {},
               child: Text(
-                "AMOUNT: TZS ${_calculateTotal(items)}",
+                "AMOUNT: TZS ${NumberFormat("#,##0").format(_calculateTotal(items))}",
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -199,7 +233,7 @@ class _OrderCardState extends State<OrderCard> {
             _info("Order Ref", order['orderRef'] ?? '-'),
             _info("Table", order['tableRef'] ?? '-'),
             _info("Payment", order['paymentStatus'] ?? '-'),
-            _info("Created", order['createdAt'] ?? '-'),
+            _info("Created", formatDate(order['createdAt'])),
 
             const SizedBox(height: 10),
 
@@ -214,7 +248,8 @@ class _OrderCardState extends State<OrderCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text("${item.name} x${item.qty}"),
-                    Text("TZS ${item.price}"),
+                    Text("TZS ${NumberFormat("#,##0").format(item.price)}"),
+                     
                   ],
                 ),
               );
@@ -244,13 +279,13 @@ class _OrderCardState extends State<OrderCard> {
     );
   }
 
-double _calculateTotal(List<OrderItem> items) {
-  double total = 0;
-  for (var item in items) {
-    total += item.price * item.qty;
+  double _calculateTotal(List<OrderItem> items) {
+    double total = 0;
+    for (var item in items) {
+      total += item.price * item.qty;
+    }
+    return total;
   }
-  return total;
-}
 
   Color _statusColor(String status) {
     switch (status) {

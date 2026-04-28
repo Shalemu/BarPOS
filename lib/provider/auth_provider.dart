@@ -17,7 +17,6 @@ class AuthProvider extends GetxController {
   bool get isAuthenticated =>
       accessToken.value != null && accessToken.value!.isNotEmpty;
 
- 
 Future<void> loadFromPrefs() async {
   print("AUTH: Loading from SharedPreferences...");
 
@@ -47,9 +46,7 @@ Future<void> loadFromPrefs() async {
   print("AUTH: INIT COMPLETE");
 }
 
-  
   // SAVE AUTH (LOGIN)
- 
   Future<void> saveAuth({
     required UserModel userData,
     required String token,
@@ -74,9 +71,7 @@ Future<void> loadFromPrefs() async {
     Get.offAllNamed(AppRoutes.home);
   }
 
-
-  /// LOGOUT
-
+  // LOGOUT
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();

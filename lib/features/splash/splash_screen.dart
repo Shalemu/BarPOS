@@ -1,7 +1,10 @@
 import 'package:barpos/core/widgets/dot_loader.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 import '../../core/constants/app_colors.dart';
-import '../auth/login/login_screen.dart';
+import '../../core/routes/app_routes.dart';
+import '../../provider/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -11,24 +14,25 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
-    _goToLogin();
+    _initApp();
   }
 
-  void _goToLogin() async {
-    await Future.delayed(const Duration(seconds: 10));
+  Future<void> _initApp() async {
+    final authProvider = Get.find<AuthProvider>();
 
+    while (!authProvider.isInitialized.value) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const LoginScreen(),
-      ),
-    );
+    if (authProvider.isAuthenticated) {
+      Get.offAllNamed(AppRoutes.home);
+    } else {
+      Get.offAllNamed(AppRoutes.login);
+    }
   }
 
   @override
@@ -69,10 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
             const Text(
               'Loading...',
-              style: TextStyle(
-                color: AppColors.hintText,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: AppColors.hintText, fontSize: 12),
             ),
           ],
         ),

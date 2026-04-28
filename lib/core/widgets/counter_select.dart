@@ -25,9 +25,9 @@ class CounterSelectionWidget extends StatelessWidget {
             const SizedBox(height: 4),
             Row(
               children: const [
-                Text("Welcome back", style: TextStyle(color: Colors.grey)),
+                Text("Welcome back!", style: TextStyle(color: AppColors.primary)),
                 SizedBox(width: 6),
-                Icon(Icons.waving_hand, size: 18, color: Colors.grey),
+                // Icon(Icons.waving_hand, size: 18, color: AppColors.primary),
               ],
             ),
 
