@@ -1,5 +1,6 @@
 import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/features/addItem/add_items_controller.dart';
+import 'package:barpos/services/model/order_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -15,15 +16,12 @@ class AddItemsScreen extends GetView<AddItemsController> {
 
       /// APP BAR
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.white,
         title: Text(
           "Edit Order #$orderId",
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color:Colors.white),
         ),
       ),
 
@@ -44,7 +42,7 @@ class AddItemsScreen extends GetView<AddItemsController> {
                 itemCount: controller.selectedItems.length,
                 itemBuilder: (context, index) {
                   final item = controller.selectedItems[index];
-                  final qty = item["itemQty"] ?? 0;
+                  final qty = item.qty;
 
                   return _itemCard(item, qty);
                 },
@@ -59,28 +57,31 @@ class AddItemsScreen extends GetView<AddItemsController> {
     );
   }
 
-  /// ================= HEADER =================
   Widget _buildHeader() {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 12,
-            offset: Offset(0, 6),
-          )
-        ],
+        border: Border.all(color: const Color(0xFFF0F0F0)),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: AppColors.primary.withOpacity(0.12),
-            child: const Icon(Icons.receipt_long, color: AppColors.primary),
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.receipt_long,
+              color: AppColors.primary,
+              size: 20,
+            ),
           ),
+
           const SizedBox(width: 12),
 
           const Expanded(
@@ -89,18 +90,12 @@ class AddItemsScreen extends GetView<AddItemsController> {
               children: [
                 Text(
                   "Order Update Mode",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                 ),
                 SizedBox(height: 4),
                 Text(
                   "Add or update items for this order",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
@@ -109,8 +104,9 @@ class AddItemsScreen extends GetView<AddItemsController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.12),
+              color: AppColors.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.primary.withOpacity(0.2)),
             ),
             child: const Text(
               "LIVE",
@@ -120,20 +116,22 @@ class AddItemsScreen extends GetView<AddItemsController> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  /// ================= EMPTY STATE =================
   Widget _emptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_bag_outlined,
-              size: 90, color: Colors.grey.shade300),
+          Icon(
+            Icons.shopping_bag_outlined,
+            size: 90,
+            color: Colors.grey.shade300,
+          ),
           const SizedBox(height: 10),
           const Text(
             "No items yet",
@@ -149,40 +147,29 @@ class AddItemsScreen extends GetView<AddItemsController> {
     );
   }
 
-  /// ================= ITEM CARD =================
-  Widget _itemCard(Map item, int qty) {
+  Widget _itemCard(OrderItem item, int qty) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFF0F0F0)),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          )
-        ],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF1F1F1)),
       ),
       child: Row(
         children: [
-          /// PRODUCT IMAGE
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              width: 52,
-              height: 52,
-              color: const Color(0xFFF3F3F3),
-              child: item["logo"] != null && item["logo"].toString().isNotEmpty
-                  ? Image.network(
-                      item["logo"],
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.image),
-                    )
-                  : const Icon(Icons.fastfood),
+          /// IMAGE
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: const Color(0xFFF5F5F5),
             ),
+            clipBehavior: Clip.antiAlias,
+            child: item.logo.isNotEmpty
+                ? Image.network(item.logo, fit: BoxFit.cover)
+                : const Icon(Icons.fastfood),
           ),
 
           const SizedBox(width: 12),
@@ -193,7 +180,7 @@ class AddItemsScreen extends GetView<AddItemsController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item["itemName"] ?? "Product",
+                  item.name,
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
@@ -202,19 +189,16 @@ class AddItemsScreen extends GetView<AddItemsController> {
                 const SizedBox(height: 4),
 
                 Text(
-                  item["itemCategory"] ?? "Category",
-                  style: TextStyle(
-                    color: Colors.grey.shade500,
-                    fontSize: 12,
-                  ),
+                  "Product",
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                 ),
 
                 const SizedBox(height: 6),
 
                 Text(
-                  "TZS ${item["price"] ?? 0}",
+                  "TZS ${item.price}",
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: Colors.black87,
                   ),
                 ),
@@ -222,11 +206,12 @@ class AddItemsScreen extends GetView<AddItemsController> {
             ),
           ),
 
-          /// QTY CONTROL
+          /// QTY CONTROLS (modern pill)
           Container(
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF6F6F6),
-              borderRadius: BorderRadius.circular(10),
+              color: const Color(0xFFF7F7F7),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
@@ -234,13 +219,9 @@ class AddItemsScreen extends GetView<AddItemsController> {
                   icon: Icons.remove,
                   onTap: () {
                     if (qty > 1) {
-                      controller.addItem(
-                        item["itemId"],
-                        item["itemCategory"],
-                        qty - 1,
-                      );
+                      controller.addItem(item, qty - 1);
                     } else {
-                      controller.removeItem(item["itemId"]);
+                      controller.removeItem(item.id);
                     }
                   },
                 ),
@@ -249,21 +230,16 @@ class AddItemsScreen extends GetView<AddItemsController> {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
                     "$qty",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
 
                 _qtyBtn(
                   icon: Icons.add,
-                  color: Colors.white,
                   bg: AppColors.primary,
                   iconColor: Colors.white,
                   onTap: () {
-                    controller.addItem(
-                      item["itemId"],
-                      item["itemCategory"],
-                      qty + 1,
-                    );
+                    controller.addItem(item, qty + 1);
                   },
                 ),
               ],
@@ -274,13 +250,11 @@ class AddItemsScreen extends GetView<AddItemsController> {
     );
   }
 
-  /// ================= QTY BUTTON =================
   Widget _qtyBtn({
     required IconData icon,
     required VoidCallback onTap,
     Color? bg,
     Color? iconColor,
-    Color? color,
   }) {
     return InkWell(
       onTap: onTap,
@@ -291,11 +265,7 @@ class AddItemsScreen extends GetView<AddItemsController> {
           color: bg ?? Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(
-          icon,
-          size: 16,
-          color: iconColor ?? Colors.black,
-        ),
+        child: Icon(icon, size: 16, color: iconColor ?? Colors.black),
       ),
     );
   }
@@ -315,7 +285,7 @@ class AddItemsScreen extends GetView<AddItemsController> {
             color: Colors.black12,
             blurRadius: 18,
             offset: Offset(0, -4),
-          )
+          ),
         ],
       ),
       child: SafeArea(
@@ -347,6 +317,7 @@ class AddItemsScreen extends GetView<AddItemsController> {
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1,
+                        color: Colors.white,
                       ),
                     ),
             );

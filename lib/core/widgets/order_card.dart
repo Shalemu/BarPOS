@@ -23,7 +23,7 @@ class _OrderCardState extends State<OrderCard> {
   Widget build(BuildContext context) {
     final order = widget.order;
 
-    final orderId = order['orderId'] ?? order['orderRef'];
+    final orderId = order['orderRef'] ?? order['orderId'];
     final status = (order['orderStatus'] ?? "pending").toString().toLowerCase();
     final items = (order['items'] ?? []) as List;
 
@@ -154,10 +154,10 @@ class _OrderCardState extends State<OrderCard> {
                             color: AppColors.primary,
                             width: 1.8,
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
+                          // padding: const EdgeInsets.symmetric(vertical: 14),
+                          // shape: RoundedRectangleBorder(
+                          //   borderRadius: BorderRadius.circular(14),
+                          // ),
                         ).copyWith(
                           overlayColor: WidgetStatePropertyAll(
                             AppColors.primary.withOpacity(0.08),
