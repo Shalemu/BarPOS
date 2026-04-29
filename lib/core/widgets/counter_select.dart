@@ -1,4 +1,5 @@
 import 'package:barpos/core/constants/app_colors.dart';
+import 'package:barpos/core/widgets/app_search_bar.dart';
 import 'package:barpos/core/widgets/dot_loader.dart';
 import 'package:barpos/features/home/home_controller.dart';
 import 'package:flutter/material.dart';
@@ -34,21 +35,10 @@ class CounterSelectionWidget extends StatelessWidget {
             const SizedBox(height: 20),
 
             /// SEARCH BAR
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppColors.grayshade,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const TextField(
-                decoration: InputDecoration(
-                  icon: Icon(Icons.search),
-                  hintText: "Search counters...",
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
-
+           AppSearchBar(
+  hintText: "Search counters...",
+  onChanged: controller.setCounterSearch,
+),
             const SizedBox(height: 20),
 
             Container(

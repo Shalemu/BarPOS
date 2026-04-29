@@ -25,6 +25,8 @@ class HomeController extends GetxController {
   var orders = <Map<String, dynamic>>[].obs;
   var isLoadingOrders = false.obs;
 
+  final RxString counterSearch = "".obs;
+
   // DEPENDENCIES
 
   final CounterService _counterService = CounterService();
@@ -57,6 +59,9 @@ class HomeController extends GetxController {
     }
   }
 
+void setCounterSearch(String value) {
+  counterSearch.value = value;
+}
 
   // LOAD COUNTERS
 

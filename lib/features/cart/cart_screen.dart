@@ -14,7 +14,6 @@ class CartScreen extends StatelessWidget {
   final OrdersController ordersController = Get.find<OrdersController>();
   final TextEditingController tableController = TextEditingController();
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -265,11 +264,20 @@ class CartScreen extends StatelessWidget {
                       controller: tableController,
                       style: const TextStyle(fontSize: 14),
                       decoration: InputDecoration(
-                        hintText: "Table number / reference",
+                        hintText: "Table number",
                         prefixIcon: const Icon(
                           Icons.table_bar_outlined,
                           size: 20,
                         ),
+
+                        /// subtle label badge
+                        suffixText: "Optional",
+                        suffixStyle: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+
                         filled: true,
                         fillColor: const Color(0xFFF3F4F6),
                         contentPadding: const EdgeInsets.symmetric(
@@ -277,11 +285,11 @@ class CartScreen extends StatelessWidget {
                           vertical: 14,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                           borderSide: const BorderSide(
                             color: Colors.black,
                             width: 1,
@@ -320,16 +328,6 @@ class CartScreen extends StatelessWidget {
                                     final tableRef = tableController.text
                                         .trim();
 
-                                    if (tableRef.isEmpty) {
-                                      TopNotification.show(
-                                        context,
-                                        message: "Table reference required",
-                                        color: Colors.red,
-                                        icon: Icons.error,
-                                      );
-                                      return;
-                                    }
-
                                     final items = controller.cartItems.map((
                                       item,
                                     ) {
@@ -355,6 +353,7 @@ class CartScreen extends StatelessWidget {
                                         message: "Order placed successfully",
                                         color: Colors.green,
                                         icon: Icons.check_circle,
+                                         seconds: 5,
                                       );
                                     } else {
                                       TopNotification.show(
@@ -362,6 +361,7 @@ class CartScreen extends StatelessWidget {
                                         message: result,
                                         color: Colors.red,
                                         icon: Icons.error,
+                                         seconds: 5,
                                       );
                                     }
                                   },
