@@ -4,8 +4,7 @@ import 'package:barpos/features/orders/orders_controller.dart';
 class BottomNavController extends GetxController {
   var currentIndex = 0.obs;
 
-  void changeTab(int index) {
-    currentIndex.value = index;
+ void changeTab(int index) {
   currentIndex.value = index;
 
   if (index == 2) {
@@ -13,7 +12,7 @@ class BottomNavController extends GetxController {
 
     final controller = Get.find<OrdersController>();
 
-    controller.fetchOrders().then((_) {
+    controller.fetchOrders(isRefresh: true).then((_) {
       if (controller.orders.isEmpty) {
         print("NO ORDERS FOUND");
       } else {
@@ -25,5 +24,6 @@ class BottomNavController extends GetxController {
       print("Reason: $e");
     });
   }
+
 }
   }

@@ -89,7 +89,7 @@ class AppPages {
       binding: CartBinding(),
     ),
 
-    // ORDERS
+   
     // CART
     GetPage(
       name: AppRoutes.cart,

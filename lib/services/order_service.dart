@@ -39,44 +39,32 @@ class OrderService {
   }
 
   Future<List<Map<String, dynamic>>> fetchOrder({
-    required String token,
-    String? fromDate,
-    String? toDate,
-    int perPage = 20,
-    int limit = 50,
-  }) async {
-    final query = {
-      "per_page": perPage.toString(),
-      "limit": limit.toString(),
+  required String token,
+  int page = 1,
+  int perPage = 5,
+  String? fromDate,
+  String? toDate,
+}) async {
+  final query = {
+    "page": page.toString(),
+    "per_page": perPage.toString(),
+    if (fromDate != null) "from_date": fromDate,
+    if (toDate != null) "to_date": toDate,
+  };
 
-      if (fromDate != null) "from_date": fromDate,
-      if (toDate != null) "to_date": toDate,
-    };
+  final uri = Uri.parse(ApiConstants.fetchOrder)
+      .replace(queryParameters: query);
 
-    final uri = Uri.parse(
-      ApiConstants.fetchOrder,
-    ).replace(queryParameters: query);
+  final response = await http.get(uri, headers: _headers(token));
+  final data = jsonDecode(response.body);
 
-    try {
-      print("REQUEST URL: $uri");
-
-      final response = await http.get(uri, headers: _headers(token));
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && data["status"] == "success") {
-        final List raw = data["data"] ?? [];
-
-        return raw.map((e) => Map<String, dynamic>.from(e)).toList();
-      }
-
-      throw data["message"] ?? "Failed to fetch orders";
-    } catch (e) {
-      print("FETCH ORDER ERROR: $e");
-      rethrow;
-    }
+  if (response.statusCode == 200 && data["status"] == "success") {
+    final List raw = data["data"] ?? [];
+    return raw.map((e) => Map<String, dynamic>.from(e)).toList();
   }
 
+  throw data["message"] ?? "Failed to fetch orders";
+}
   Future<void> cancelOrder({
     required String token,
     required int orderId,

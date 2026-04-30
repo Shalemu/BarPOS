@@ -33,11 +33,26 @@ class OrdersScreen extends GetView<OrdersController> {
                       ),
                     )
                   : ListView.builder(
+                      controller: controller.scrollController,
                       padding: const EdgeInsets.all(12),
-                      itemCount: orders.length,
+                      itemCount: orders.length + 1,
                       itemBuilder: (context, index) {
-                        final order = orders[index];
-                        return OrderCard(order: order);
+                        if (index < orders.length) {
+                          final order = orders[index];
+                          return OrderCard(order: order);
+                        }
+
+                        // loader at bottom
+                        return Obx(
+                          () => controller.isLoadingMore.value
+                              ? const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              : const SizedBox(),
+                        );
                       },
                     ),
             ),
