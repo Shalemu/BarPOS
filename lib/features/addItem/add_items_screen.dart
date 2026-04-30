@@ -267,7 +267,7 @@ Widget _addItemsButton() {
             if (qty > 1) {
               controller.addItem(item, qty - 1);
             } else {
-              controller.removeItem(item.id);
+              controller.removeItem(item);
             }
           }),
 

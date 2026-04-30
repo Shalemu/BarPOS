@@ -54,7 +54,7 @@ class OrdersController extends GetxController {
       hasMore = true;
       orders.clear();
 
-      // 🔥 RESET FILTERS
+   
       searchQuery.value = "";
       statusFilter.value = "all";
     }

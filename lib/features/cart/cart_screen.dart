@@ -123,6 +123,7 @@ class CartScreen extends StatelessWidget {
                         ),
                       ),
 
+                      /// QUANTITY CONTROL
                       Container(
                         height: 28,
                         decoration: BoxDecoration(
@@ -131,9 +132,12 @@ class CartScreen extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            // MINUS
+                            /// MINUS
                             InkWell(
-                              onTap: () => controller.decreaseQty(item.id),
+                              onTap: () => controller.decreaseQty(
+                                context,
+                                item.uniqueId,
+                              ),
                               child: const SizedBox(
                                 width: 28,
                                 child: Icon(
@@ -144,14 +148,14 @@ class CartScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // QTY
+                            /// QTY
                             Obx(() {
-                              final qty = controller.cartItems
-                                  .firstWhere((e) => e.id == item.id)
-                                  .quantity;
+                              final cartItem = controller.cartItems.firstWhere(
+                                (e) => e.uniqueId == item.uniqueId,
+                              );
 
                               return Text(
-                                "$qty",
+                                "${cartItem.quantity}",
                                 style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -162,10 +166,13 @@ class CartScreen extends StatelessWidget {
                             InkWell(
                               onTap: () {
                                 final product = homeController.products
-                                    .firstWhere((p) => p.id == item.id);
+                                    .firstWhere(
+                                      (p) => p.uniqueId == item.uniqueId,
+                                    );
 
                                 final msg = controller.increaseQty(
-                                  item.id,
+                                  context,
+                                  item.uniqueId,
                                   product,
                                 );
 
@@ -199,7 +206,7 @@ class CartScreen extends StatelessWidget {
               },
             ),
 
-            /// CHECKOUT BAR (PREMIUM UI)
+            /// ================= CHECKOUT BAR =================
             Positioned(
               left: 0,
               right: 0,
@@ -222,7 +229,7 @@ class CartScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    /// TOTAL ROW (PREMIUM)
+                    /// TOTAL
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -259,25 +266,16 @@ class CartScreen extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    /// INPUT FIELD (PREMIUM)
+                    /// TABLE INPUT
                     TextField(
                       controller: tableController,
-                      style: const TextStyle(fontSize: 14),
                       decoration: InputDecoration(
                         hintText: "Table number",
                         prefixIcon: const Icon(
                           Icons.table_bar_outlined,
                           size: 20,
                         ),
-
-                        /// subtle label badge
                         suffixText: "Optional",
-                        suffixStyle: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-
                         filled: true,
                         fillColor: const Color(0xFFF3F4F6),
                         contentPadding: const EdgeInsets.symmetric(
@@ -288,109 +286,85 @@ class CartScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Colors.black,
-                            width: 1,
-                          ),
-                        ),
                       ),
                     ),
 
                     const SizedBox(height: 14),
 
-                    /// BUTTON (PREMIUM)
+                    /// SUBMIT BUTTON
                     SizedBox(
                       width: double.infinity,
                       height: 52,
                       child: Obx(() {
                         final loading = ordersController.isLoading.value;
 
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            gradient: loading
-                                ? null
-                                : const LinearGradient(
-                                    colors: [
-                                      Color(0xFF111827),
-                                      Color(0xFF1F2937),
-                                    ],
-                                  ),
-                            color: loading ? Colors.grey.shade300 : null,
-                          ),
-                          child: ElevatedButton(
-                            onPressed: loading
-                                ? null
-                                : () async {
-                                    final tableRef = tableController.text
-                                        .trim();
+                        return ElevatedButton(
+                          onPressed: loading
+                              ? null
+                              : () async {
+                                  final tableRef = tableController.text.trim();
 
-                                    final items = controller.cartItems.map((
-                                      item,
-                                    ) {
-                                      return {
-                                        "itemId": item.id,
-                                        "itemCategory": item.category,
-                                        "itemQty": item.quantity,
-                                      };
-                                    }).toList();
+                                  final items = controller.cartItems.map((
+                                    item,
+                                  ) {
+                                    return {
+                                      "itemId": item.id,
+                                      "itemCategory": item.category,
+                                      "itemQty": item.quantity,
+                                    };
+                                  }).toList();
 
-                                    final result = await ordersController
-                                        .submitOrder(
-                                          tableRef: tableRef,
-                                          items: items,
-                                        );
-
-                                    if (result == null) {
-                                      controller.clearCart();
-                                      tableController.clear();
-
-                                      TopNotification.show(
-                                        context,
-                                        message: "Order placed successfully",
-                                        color: Colors.green,
-                                        icon: Icons.check_circle,
-                                         seconds: 5,
+                                  final result = await ordersController
+                                      .submitOrder(
+                                        tableRef: tableRef,
+                                        items: items,
                                       );
-                                    } else {
-                                      TopNotification.show(
-                                        context,
-                                        message: result,
-                                        color: Colors.red,
-                                        icon: Icons.error,
-                                         seconds: 5,
-                                      );
-                                    }
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
+
+                                  if (result == null) {
+                                    controller.clearCart();
+                                    tableController.clear();
+
+                                    TopNotification.show(
+                                      context,
+                                      message: "Order placed successfully",
+                                      color: Colors.green,
+                                      icon: Icons.check_circle,
+                                      seconds: 5,
+                                    );
+                                  } else {
+                                    TopNotification.show(
+                                      context,
+                                      message: result,
+                                      color: Colors.red,
+                                      icon: Icons.error,
+                                      seconds: 5,
+                                    );
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            child: loading
-                                ? const SizedBox(
-                                    height: 18,
-                                    width: 18,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.black,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text(
-                                    "SUBMIT ORDER",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                      color: Colors.white,
-                                      letterSpacing: 1.2,
-                                    ),
-                                  ),
                           ),
+                          child: loading
+                              ? const SizedBox(
+                                  height: 18,
+                                  width: 18,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  "SUBMIT ORDER",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
                         );
                       }),
                     ),

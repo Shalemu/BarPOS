@@ -17,6 +17,8 @@ class ProductModel {
     required this.availableQty,
   });
 
+  String get uniqueId => "$category-$id";
+
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       id: json['id'],

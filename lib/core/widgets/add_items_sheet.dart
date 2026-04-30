@@ -78,12 +78,12 @@ class AddItemsSheet extends StatelessWidget {
                     final item = products[index];
 
                     final inCart = controller.selectedItems.any(
-                      (e) => e.id == item.id,
+                      (e) => e.uniqueId == item.uniqueId ,
                     );
 
                     final qty =
                         controller.selectedItems
-                            .firstWhereOrNull((e) => e.id == item.id)
+                            .firstWhereOrNull((e) => e.uniqueId == item.uniqueId)
                             ?.qty ??
                         0;
 

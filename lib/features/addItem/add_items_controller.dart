@@ -111,23 +111,27 @@ class AddItemsController extends GetxController {
   }
 
 
-  void addItem(OrderItem item, int qty) {
-    final index = selectedItems.indexWhere((e) => e.id == item.id);
+void addItem(OrderItem item, int qty) {
+  final index = selectedItems.indexWhere(
+    (e) => e.uniqueId == item.uniqueId, 
+  );
 
-    if (index != -1) {
-      selectedItems[index] =
-          selectedItems[index].copyWith(qty: qty);
-    } else {
-      selectedItems.add(item.copyWith(qty: qty));
-    }
-
-    selectedItems.refresh();
-
-    _notify("${item.name} added", Colors.green, Icons.add_circle);
+  if (index != -1) {
+    selectedItems[index] =
+        selectedItems[index].copyWith(qty: qty);
+  } else {
+    selectedItems.add(item.copyWith(qty: qty));
   }
 
-  void removeItem(int id) {
-    selectedItems.removeWhere((e) => e.id == id);
+  selectedItems.refresh();
+
+  _notify("${item.name} added", Colors.green, Icons.add_circle);
+}
+
+  void removeItem(OrderItem item) {
+    selectedItems.removeWhere(
+       (e) => e.uniqueId == item.uniqueId, 
+      );
 
     _notify("Item removed", Colors.orange, Icons.remove_circle);
   }

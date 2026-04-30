@@ -7,7 +7,6 @@ class ProfileScreen extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).primaryColor;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
@@ -65,13 +64,13 @@ class ProfileScreen extends GetView<ProfileController> {
                       const SizedBox(height: 4),
 
                       // Email
-                      Text(
-                        controller.email,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
+                      // Text(
+                      //   controller.email,
+                      //   style: TextStyle(
+                      //     fontSize: 14,
+                      //     color: Colors.grey.shade600,
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

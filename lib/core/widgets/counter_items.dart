@@ -1,5 +1,6 @@
 import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/core/widgets/dot_loader.dart';
+import 'package:barpos/core/widgets/top_notification.dart';
 import 'package:barpos/features/cart/cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -213,14 +214,43 @@ class CounterItemsWidget extends StatelessWidget {
                               final cartController = Get.find<CartController>();
 
                               final cartItem = cartController.cartItems
-                                  .firstWhereOrNull((e) => e.id == item.id);
+                                  .firstWhereOrNull(
+                                    (e) => e.uniqueId == item.uniqueId,
+                                  );
 
                               final qty = cartItem?.quantity ?? 0;
 
                               if (qty == 0) {
                                 return GestureDetector(
                                   onTap: () {
-                                    cartController.addToCart(item);
+                                    final msg = cartController.addToCart(
+                                      context,
+                                      item,
+                                    );
+
+                                    print(" ADD CLICKED");
+                                    print("ID: ${item.id}");
+                                    print("CATEGORY: ${item.category}");
+                                    print("UNIQUE: ${item.uniqueId}");
+                                    print(
+                                      "CURRENT CART SIZE: ${cartController.cartItems.length}",
+                                    );
+
+                                    for (var c in cartController.cartItems) {
+                                      print(
+                                        "🛒 CART ITEM => ${c.uniqueId} | qty=${c.quantity}",
+                                      );
+                                    }
+
+                                    if (msg != null) {
+                                      TopNotification.show(
+                                        context,
+                                        message: msg,
+                                        color: Colors.red,
+                                        icon: Icons.warning,
+                                        seconds: 5,
+                                      );
+                                    }
                                   },
                                   child: Container(
                                     height: 36,
@@ -264,8 +294,10 @@ class CounterItemsWidget extends StatelessWidget {
                                     Material(
                                       color: Colors.transparent,
                                       child: InkWell(
-                                        onTap: () =>
-                                            cartController.decreaseQty(item.id),
+                                        onTap: () => cartController.decreaseQty(
+                                          context,
+                                          item.uniqueId,
+                                        ),
                                         child: const SizedBox(
                                           width: 36,
                                           height: 36,
@@ -290,7 +322,11 @@ class CounterItemsWidget extends StatelessWidget {
                                       child: InkWell(
                                         onTap: () {
                                           final msg = cartController
-                                              .increaseQty(item.id, item);
+                                              .increaseQty(
+                                                context,
+                                                item.uniqueId,
+                                                item,
+                                              );
 
                                           if (msg != null) {
                                             Get.snackbar(

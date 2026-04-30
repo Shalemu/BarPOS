@@ -25,36 +25,38 @@ class OrdersScreen extends GetView<OrdersController> {
             _buildFilterRow(),
 
             Expanded(
-              child: orders.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "No orders found",
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      controller: controller.scrollController,
-                      padding: const EdgeInsets.all(12),
-                      itemCount: orders.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index < orders.length) {
-                          final order = orders[index];
-                          return OrderCard(order: order);
-                        }
+              child: Obx(() {
+                final orders = controller.filteredOrders;
 
-                        // loader at bottom
-                        return Obx(
-                          () => controller.isLoadingMore.value
-                              ? const Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
-                              : const SizedBox(),
-                        );
-                      },
+                if (orders.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      "No orders found",
+                      style: TextStyle(color: Colors.grey),
                     ),
+                  );
+                }
+
+                return ListView.builder(
+                  controller: controller.scrollController,
+                  padding: const EdgeInsets.all(12),
+                  itemCount: orders.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index < orders.length) {
+                      return OrderCard(order: orders[index]);
+                    }
+
+                    return Obx(
+                      () => controller.isLoadingMore.value
+                          ? const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : const SizedBox(),
+                    );
+                  },
+                );
+              }),
             ),
           ],
         );
@@ -198,9 +200,8 @@ class OrdersScreen extends GetView<OrdersController> {
   }
 
   Widget _filterChip(String label, String current) {
-    final isSelected =
-        current.toLowerCase() == label.toLowerCase() ||
-        (current == "all" && label == "All");
+    final value = label.toLowerCase();
+    final isSelected = current == value;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -220,7 +221,7 @@ class OrdersScreen extends GetView<OrdersController> {
           color: isSelected ? AppColors.primary : Colors.transparent,
         ),
         onSelected: (_) {
-          controller.setStatus(label == "All" ? "all" : label.toLowerCase());
+          controller.statusFilter.value = value; 
         },
       ),
     );

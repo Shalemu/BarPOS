@@ -159,7 +159,6 @@ Future<void> loadProducts([int? counterId]) async {
 
  
   //SELECT COUNTER
-  
   void selectCounter(CounterModel counter) {
     selectedCounter.value = counter;
 
