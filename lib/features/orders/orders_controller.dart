@@ -13,6 +13,7 @@ class OrdersController extends GetxController {
 
   final RxString searchQuery = "".obs;
   final RxString statusFilter = "all".obs;
+
   final Rxn<DateTime> fromDate = Rxn<DateTime>();
   final Rxn<DateTime> toDate = Rxn<DateTime>();
 
@@ -22,7 +23,6 @@ class OrdersController extends GetxController {
 
   int currentPage = 1;
   bool hasMore = true;
-
 
   @override
   void onInit() {
@@ -44,49 +44,64 @@ class OrdersController extends GetxController {
     super.onClose();
   }
 
- 
+
+  // FETCH ORDERS
+
   Future<void> fetchOrders({bool isRefresh = false}) async {
-  final auth = Get.find<AuthProvider>();
+    final auth = Get.find<AuthProvider>();
 
-  try {
-    if (isRefresh) {
-      currentPage = 1;
-      hasMore = true;
-      orders.clear();
+    try {
+      if (isRefresh) {
+        currentPage = 1;
+        hasMore = true;
+        orders.clear();
 
-   
-      searchQuery.value = "";
-      statusFilter.value = "all";
+        searchQuery.value = "";
+        statusFilter.value = "all";
+      }
+
+      isLoading.value = true;
+
+      final hasDateFilter = fromDate.value != null || toDate.value != null;
+
+      final result = await _service.fetchOrder(
+        token: auth.accessToken.value!,
+        page: currentPage,
+        fromDate: hasDateFilter
+            ? fromDate.value?.toIso8601String().split("T").first
+            : null,
+        toDate: hasDateFilter
+            ? toDate.value?.toIso8601String().split("T").first
+            : null,
+      );
+
+      orders.assignAll(result);
+
+      print("========== ORDERS LOADED ==========");
+      print("Total Orders: ${result.length}");
+
+      for (final order in result) {
+        print("ORDER #${order['orderRef']}");
+        final items = order['items'] ?? [];
+
+        for (final item in items) {
+          print("  Item: ${item['itemName']}");
+          print("  Qty: ${item['itemQty']}");
+          print("  Category: ${item['itemCategory']}");
+        }
+      }
+
+      if (result.length < 5) hasMore = false;
+    } catch (e) {
+      print("FETCH ERROR: $e");
+    } finally {
+      isLoading.value = false;
     }
-
-    isLoading.value = true;
-
-    final hasDateFilter = fromDate.value != null || toDate.value != null;
-
-    final result = await _service.fetchOrder(
-      token: auth.accessToken.value!,
-      page: currentPage,
-      fromDate: hasDateFilter
-          ? fromDate.value?.toIso8601String().split("T").first
-          : null,
-      toDate: hasDateFilter
-          ? toDate.value?.toIso8601String().split("T").first
-          : null,
-    );
-
-    orders.assignAll(result);
-
-    if (result.length < 5) {
-      hasMore = false;
-    }
-
-  } catch (e) {
-    print("FETCH ERROR: $e");
-  } finally {
-    isLoading.value = false;
   }
-}
- 
+
+
+  // LOAD MORE
+
   Future<void> loadMoreOrders() async {
     if (!hasMore || isLoadingMore.value) return;
 
@@ -114,7 +129,6 @@ class OrdersController extends GetxController {
       } else {
         orders.addAll(result);
       }
-
     } catch (e) {
       print("LOAD MORE ERROR: $e");
     } finally {
@@ -122,6 +136,8 @@ class OrdersController extends GetxController {
     }
   }
 
+ 
+  // FILTER
  
   void clearDateFilter() {
     fromDate.value = null;
@@ -158,6 +174,8 @@ class OrdersController extends GetxController {
   }
 
  
+  // SUBMIT ORDER
+
   Future<String?> submitOrder({
     String? tableRef,
     required List<Map<String, dynamic>> items,
@@ -166,6 +184,7 @@ class OrdersController extends GetxController {
     final counterId = counterProvider.selectedCounterId.value;
 
     if (counterId == null) {
+      print("No counter selected");
       return "Please select counter first";
     }
 
@@ -177,6 +196,19 @@ class OrdersController extends GetxController {
               ? null
               : tableRef.trim();
 
+      print("========== SUBMIT ORDER ==========");
+      print("Table: $cleanedTable");
+      print("Counter ID: $counterId");
+      print("Items Count: ${items.length}");
+
+      for (final item in items) {
+        print("Item ID: ${item['itemId']}");
+        print("Category: ${item['itemCategory']}");
+        print("Qty: ${item['itemQty']}");
+        print("Remaining Stock: ${item['stock']?['remaining']}");
+        print("Initial Stock: ${item['stock']?['initial']}");
+      }
+
       await _service.submitOrder(
         token: auth.accessToken.value!,
         counterId: counterId,
@@ -185,14 +217,18 @@ class OrdersController extends GetxController {
       );
 
       await fetchOrders(isRefresh: true);
-      return null;
 
+      return null;
     } catch (e) {
+      print("SUBMIT ERROR: $e");
       return e.toString();
     } finally {
       isLoading.value = false;
     }
   }
+
+
+  // CANCEL ORDER
 
   Future<void> cancelOrder(int orderId) async {
     final auth = Get.find<AuthProvider>();
@@ -206,13 +242,15 @@ class OrdersController extends GetxController {
       );
 
       await fetchOrders(isRefresh: true);
-
     } catch (e) {
       print("CANCEL ERROR: $e");
     } finally {
       isLoading.value = false;
     }
   }
+
+ 
+  // ADD ITEMS
 
   Future<void> addItems({
     required int orderId,
@@ -223,6 +261,14 @@ class OrdersController extends GetxController {
     try {
       isLoading.value = true;
 
+      print("========== ADD ITEMS ==========");
+      print("Order ID: $orderId");
+
+      for (final item in items) {
+        print("Item: ${item['itemName']}");
+        print("Qty: ${item['itemQty']}");
+      }
+
       await _service.addItemsToOrder(
         token: auth.accessToken.value!,
         orderId: orderId,
@@ -230,7 +276,6 @@ class OrdersController extends GetxController {
       );
 
       await fetchOrders(isRefresh: true);
-
     } catch (e) {
       print("ADD ITEMS ERROR: $e");
     } finally {

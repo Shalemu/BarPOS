@@ -110,13 +110,36 @@ class CartScreen extends StatelessWidget {
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
+
+                            const SizedBox(height: 2),
+
+                            Text(
+                              item.category,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.blueGrey,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+
                             const SizedBox(height: 4),
+
                             Text(
                               "TZS ${item.price}",
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: Colors.grey,
                                 fontWeight: FontWeight.w500,
+                              ),
+                            ),
+
+                            const SizedBox(height: 4),
+
+                            Text(
+                              "Remaining: ${item.remainingQty}",
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey,
                               ),
                             ),
                           ],
@@ -206,7 +229,7 @@ class CartScreen extends StatelessWidget {
               },
             ),
 
-            /// ================= CHECKOUT BAR =================
+            //CHECKOUT BAR
             Positioned(
               left: 0,
               right: 0,
@@ -311,9 +334,22 @@ class CartScreen extends StatelessWidget {
                                       "itemId": item.id,
                                       "itemCategory": item.category,
                                       "itemQty": item.quantity,
+                                      "stock": {
+                                        "initial":
+                                            item.quantity + item.remainingQty,
+                                        "remaining": item.remainingQty,
+                                      },
                                     };
                                   }).toList();
 
+                       
+                                  print("Table: $tableRef");
+                                  print("Items: $items");
+                                  print("Total items: ${items.length}");
+                                  print(
+                                    "Total price: ${controller.totalPrice}",
+                                  );
+                                 
                                   final result = await ordersController
                                       .submitOrder(
                                         tableRef: tableRef,

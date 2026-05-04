@@ -27,7 +27,12 @@ class ProductModel {
       logo: json['logo'] ?? '',
       category: json['category'],
       volume: json['volume']?.toString(),
-      availableQty: json['availableQty'] ?? 0,
+
+      
+      availableQty:
+          json['availableQty'] ??
+          json['stock'] ??
+          0,
     );
   }
 }

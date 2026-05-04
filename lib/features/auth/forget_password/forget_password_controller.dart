@@ -40,7 +40,7 @@ class ForgotPasswordController extends GetxController {
 
   void error(BuildContext context, String message) {
     TopNotification.show(
-      context,
+     context,
       message: message,
       color: Colors.redAccent,
       icon: Icons.error_outline,

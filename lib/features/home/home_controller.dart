@@ -8,7 +8,6 @@ import 'package:barpos/services/product_service.dart';
 import 'package:get/get.dart';
 
 class HomeController extends GetxController {
-
   // DATA
 
   var counters = <CounterModel>[].obs;
@@ -27,6 +26,14 @@ class HomeController extends GetxController {
 
   final RxString counterSearch = "".obs;
 
+  Map<int, ProductModel> get productMap {
+    return {for (var p in products) p.id: p};
+  }
+
+  int getAvailableStock(int productId) {
+  return productMap[productId]?.availableQty ?? 0;
+}
+
   // DEPENDENCIES
 
   final CounterService _counterService = CounterService();
@@ -34,15 +41,12 @@ class HomeController extends GetxController {
   final CartController cartController = Get.find<CartController>();
   final CounterProvider counterProvider = Get.find<CounterProvider>();
 
-
   // USER INFO
 
-  String get userName =>
-      authProvider.user.value?.firstName ?? "User";
+  String get userName => authProvider.user.value?.firstName ?? "User";
 
- 
   // INIT
- 
+
   @override
   void onInit() {
     super.onInit();
@@ -59,9 +63,9 @@ class HomeController extends GetxController {
     }
   }
 
-void setCounterSearch(String value) {
-  counterSearch.value = value;
-}
+  void setCounterSearch(String value) {
+    counterSearch.value = value;
+  }
 
   // LOAD COUNTERS
 
@@ -83,64 +87,55 @@ void setCounterSearch(String value) {
     }
   }
 
-  
   // LOAD PRODUCTS
- 
-Future<void> loadProducts([int? counterId]) async {
-  try {
-    isLoadingProducts.value = true;
 
-    final token = authProvider.accessToken.value;
-    if (token == null || token.isEmpty) return;
+  Future<void> loadProducts([int? counterId]) async {
+    try {
+      isLoadingProducts.value = true;
 
-    final id = counterId ?? counterProvider.selectedCounterId.value;
+      final token = authProvider.accessToken.value;
+      if (token == null || token.isEmpty) return;
 
-   
-    print("PARAM COUNTER ID: $counterId");
-    print("PROVIDER COUNTER ID: ${counterProvider.selectedCounterId.value}");
-    print("FINAL USED ID: $id");
+      final id = counterId ?? counterProvider.selectedCounterId.value;
 
-    if (id == null) {
-      _safeSnackbar("Error", "No counter selected");
-      return;
+      print("PARAM COUNTER ID: $counterId");
+      print("PROVIDER COUNTER ID: ${counterProvider.selectedCounterId.value}");
+      print("FINAL USED ID: $id");
+
+      if (id == null) {
+        _safeSnackbar("Error", "No counter selected");
+        return;
+      }
+
+      final result = await ProductService().fetchCounterProducts(token, id);
+
+      products.value = result;
+
+      selectedCategory.value = "All";
+      searchQuery.value = "";
+    } catch (e) {
+      _safeSnackbar("Error", e.toString());
+    } finally {
+      isLoadingProducts.value = false;
     }
-
-    final result = await ProductService().fetchCounterProducts(
-      token,
-      id,
-    );
-
-    products.value = result;
-
-    selectedCategory.value = "All";
-    searchQuery.value = "";
-  } catch (e) {
-    _safeSnackbar("Error", e.toString());
-  } finally {
-    isLoadingProducts.value = false;
   }
-}
 
- 
   // CATEGORIES (DYNAMIC)
- 
+
   List<String> get categories {
     final set = products.map((e) => e.category).toSet().toList();
     return ["All", ...set];
   }
 
-  
   // FILTERED PRODUCTS
-  
+
   List<ProductModel> get filteredProducts {
     return products.where((product) {
-      
       final matchCategory = selectedCategory.value == "All"
           ? true
           : product.category.toLowerCase().trim() ==
-              selectedCategory.value.toLowerCase().trim();
+                selectedCategory.value.toLowerCase().trim();
 
-      
       final query = searchQuery.value.toLowerCase().trim();
       final name = product.name.toLowerCase();
 
@@ -153,21 +148,19 @@ Future<void> loadProducts([int? counterId]) async {
   }
 
   void changeCategory(String category) {
-  selectedCategory.value = category;
-  products.refresh(); 
-}
+    selectedCategory.value = category;
+    products.refresh();
+  }
 
- 
   //SELECT COUNTER
   void selectCounter(CounterModel counter) {
     selectedCounter.value = counter;
 
-     counterProvider.setCounter(counter);
+    counterProvider.setCounter(counter);
   }
 
- 
   // SNACKBAR SAFE
- 
+
   void _safeSnackbar(String title, String message) {
     if (Get.context != null) {
       Future.delayed(Duration.zero, () {
@@ -176,7 +169,6 @@ Future<void> loadProducts([int? counterId]) async {
     }
   }
 
-  
   // CART QUANTITY SYSTEM
 
   var quantities = <int, int>{}.obs;

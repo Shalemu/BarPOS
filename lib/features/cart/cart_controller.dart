@@ -45,7 +45,23 @@ class CartController extends GetxController {
     }
 
     if (index != -1) {
-      cartItems[index].quantity++;
+      final item = cartItems[index];
+
+      if (product.category.toLowerCase() == "product") {
+        if (item.quantity >= product.availableQty) {
+          TopNotification.show(
+            context,
+            message: "Only ${product.availableQty} items available",
+            color: Colors.red,
+            icon: Icons.warning,
+            seconds: 3,
+          );
+          return "Stock limit reached";
+        }
+      }
+
+      item.quantity++;
+      item.remainingQty = product.availableQty - item.quantity;
     } else {
       cartItems.add(
         CartItem(
@@ -57,10 +73,12 @@ class CartController extends GetxController {
           price: product.price.toDouble(),
           volume: product.volume,
           counterId: counterId,
+
+          quantity: 1,
+          remainingQty: product.availableQty - 1,
         ),
       );
     }
-
     cartItems.refresh();
 
     TopNotification.show(
@@ -75,7 +93,11 @@ class CartController extends GetxController {
   }
 
   // INCREASE
-  String? increaseQty(BuildContext context, String uniqueId, ProductModel product) {
+  String? increaseQty(
+    BuildContext context,
+    String uniqueId,
+    ProductModel product,
+  ) {
     final index = cartItems.indexWhere((e) => e.uniqueId == uniqueId);
 
     if (index == -1) return null;
@@ -96,6 +118,7 @@ class CartController extends GetxController {
     }
 
     item.quantity++;
+    item.remainingQty = product.availableQty - item.quantity;
     cartItems.refresh();
     return null;
   }
@@ -106,10 +129,15 @@ class CartController extends GetxController {
 
     if (index == -1) return;
 
-    if (cartItems[index].quantity > 1) {
-      cartItems[index].quantity--;
+    final item = cartItems[index];
+
+    if (item.quantity > 1) {
+      item.quantity--;
+
+      // FIX: use remainingQty logic based on original stock
+      item.remainingQty = item.remainingQty + 1;
     } else {
-      final removed = cartItems[index].name;
+      final removed = item.name;
 
       cartItems.removeAt(index);
 
@@ -129,8 +157,7 @@ class CartController extends GetxController {
   double get totalPrice =>
       cartItems.fold(0, (sum, item) => sum + item.price * item.quantity);
 
-  int get cartCount =>
-      cartItems.fold(0, (sum, item) => sum + item.quantity);
+  int get cartCount => cartItems.fold(0, (sum, item) => sum + item.quantity);
 
   void clearCart() {
     cartItems.clear();

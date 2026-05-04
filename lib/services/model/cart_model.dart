@@ -8,6 +8,7 @@ class CartItem {
   final String? volume;
 
   int quantity;
+  int remainingQty; 
   final int counterId;
 
   CartItem({
@@ -20,5 +21,6 @@ class CartItem {
     this.volume,
     required this.counterId,
     this.quantity = 1,
+    required this.remainingQty,
   });
 }

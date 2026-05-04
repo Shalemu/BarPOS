@@ -244,7 +244,7 @@ class CounterItemsWidget extends StatelessWidget {
 
                                     if (msg != null) {
                                       TopNotification.show(
-                                        context,
+                                      context,
                                         message: msg,
                                         color: Colors.red,
                                         icon: Icons.warning,

@@ -15,7 +15,6 @@ class AddItemsScreen extends GetView<AddItemsController> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
 
-  
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         elevation: 0,
@@ -30,7 +29,6 @@ class AddItemsScreen extends GetView<AddItemsController> {
         ),
       ),
 
-    
       body: Column(
         children: [
           _buildHeader(),
@@ -60,7 +58,6 @@ class AddItemsScreen extends GetView<AddItemsController> {
       bottomNavigationBar: _bottomBar(),
     );
   }
-
 
   Widget _buildHeader() {
     return Container(
@@ -127,42 +124,38 @@ class AddItemsScreen extends GetView<AddItemsController> {
     );
   }
 
-
-Widget _addItemsButton() {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: SizedBox(
-      width: double.infinity,
-      height: 42, // slightly smaller = more premium feel
-      child: OutlinedButton.icon(
-        onPressed: _openAddItemsSheet,
-        icon: const Icon(Icons.add, size: 18),
-        label: const Text(
-          "Add Items",
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
+  Widget _addItemsButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SizedBox(
+        width: double.infinity,
+        height: 42, // slightly smaller = more premium feel
+        child: OutlinedButton.icon(
+          onPressed: _openAddItemsSheet,
+          icon: const Icon(Icons.add, size: 18),
+          label: const Text(
+            "Add Items",
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary,
 
-          side: BorderSide(
-            color: AppColors.primary.withOpacity(0.5),
-            width: 1,
+            side: BorderSide(
+              color: AppColors.primary.withOpacity(0.5),
+              width: 1,
+            ),
+
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
-
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8), 
-          ),
-
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   void _openAddItemsSheet() {
     Get.bottomSheet(
@@ -178,8 +171,11 @@ Widget _addItemsButton() {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_bag_outlined,
-              size: 90, color: Colors.grey.shade300),
+          Icon(
+            Icons.shopping_bag_outlined,
+            size: 90,
+            color: Colors.grey.shade300,
+          ),
           const SizedBox(height: 10),
           const Text(
             "No items yet",
@@ -225,25 +221,70 @@ Widget _addItemsButton() {
 
           // INFO
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "TZS ${item.price}",
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ],
+            child: Builder(
+              builder: (context) {
+                final inCart = controller.selectedItems.any(
+                  (e) => e.uniqueId == item.uniqueId,
+                );
+
+                final qty =
+                    controller.selectedItems
+                        .firstWhereOrNull((e) => e.uniqueId == item.uniqueId)
+                        ?.qty ??
+                    0;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      item.category,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      "TZS ${item.price}",
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      "Stock: ${item.remainingQty}",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: item.remainingQty > 0
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                    ),
+
+                    if (inCart)
+                      Text(
+                        "In cart: $qty",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
           ),
-
           // QTY
           _qtyBox(item),
         ],
@@ -251,41 +292,56 @@ Widget _addItemsButton() {
     );
   }
 
-  // ================= QTY CONTROL =================
-  Widget _qtyBox(OrderItem item) {
-    final qty = item.qty;
+Widget _qtyBox(OrderItem item) {
+  final qty = controller.selectedItems
+          .firstWhereOrNull((e) => e.uniqueId == item.uniqueId)
+          ?.qty ??
+      0;
 
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF7F7F7),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          _qtyBtn(Icons.remove, () {
-            if (qty > 1) {
-              controller.addItem(item, qty - 1);
-            } else {
-              controller.removeItem(item);
-            }
-          }),
+  return Container(
+    padding: const EdgeInsets.all(4),
+    decoration: BoxDecoration(
+      color: const Color(0xFFF7F7F7),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      children: [
+        _qtyBtn(Icons.remove, () {
+          print("🟡 CLICK: DECREASE ITEM");
+          print("Item: ${item.name}");
+          print("Current Qty: $qty");
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              "$qty",
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
+          if (qty > 1) {
+            controller.decreaseItem(item);
+          } else {
+            controller.removeItem(item);
+          }
+
+          print("ACTION: decrease/remove executed");
+        }),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+            "$qty",
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
+        ),
 
-          _qtyBtn(Icons.add, () {
-            controller.addItem(item, qty + 1);
-          }, active: true),
-        ],
-      ),
-    );
-  }
+        _qtyBtn(Icons.add, () {
+          print("CLICK: ADD ITEM");
+          print("Item: ${item.name}");
+          print("Current Qty: $qty");
+          print("Remaining Stock: ${item.remainingQty}");
+
+          controller.addItem(item);
+
+          print("ACTION: addItem executed");
+        }, active: true),
+      ],
+    ),
+  );
+}
 
   Widget _qtyBtn(IconData icon, VoidCallback onTap, {bool active = false}) {
     return InkWell(

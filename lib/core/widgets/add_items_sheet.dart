@@ -1,6 +1,5 @@
 import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/features/addItem/add_items_controller.dart';
-import 'package:barpos/core/widgets/top_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,10 +18,9 @@ class AddItemsSheet extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-
         child: Column(
           children: [
-            /// HANDLE BAR
+            /// HANDLE
             Container(
               width: 40,
               height: 5,
@@ -40,6 +38,38 @@ class AddItemsSheet extends StatelessWidget {
             ),
 
             const SizedBox(height: 12),
+
+            /// INLINE NOTIFICATION (🔥 NEW)
+            Obx(() {
+              if (!controller.showSheetMessage.value) {
+                return const SizedBox.shrink();
+              }
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: controller.sheetMessageColor.value,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      controller.sheetMessageIcon.value,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        controller.sheetMessage.value,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
 
             /// SEARCH
             TextField(
@@ -78,12 +108,14 @@ class AddItemsSheet extends StatelessWidget {
                     final item = products[index];
 
                     final inCart = controller.selectedItems.any(
-                      (e) => e.uniqueId == item.uniqueId ,
+                      (e) => e.uniqueId == item.uniqueId,
                     );
 
                     final qty =
                         controller.selectedItems
-                            .firstWhereOrNull((e) => e.uniqueId == item.uniqueId)
+                            .firstWhereOrNull(
+                              (e) => e.uniqueId == item.uniqueId,
+                            )
                             ?.qty ??
                         0;
 
@@ -95,7 +127,6 @@ class AddItemsSheet extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: const Color(0xFFF1F1F1)),
                       ),
-
                       child: Row(
                         children: [
                           /// IMAGE
@@ -127,10 +158,7 @@ class AddItemsSheet extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  "TZS ${item.price}",
-                                  style: const TextStyle(color: Colors.black87),
-                                ),
+                                Text("TZS ${item.price}"),
                                 if (inCart)
                                   Text(
                                     "In cart: $qty",
@@ -144,61 +172,43 @@ class AddItemsSheet extends StatelessWidget {
                             ),
                           ),
 
-                          /// PREMIUM OUTLINED BUTTON
+                          /// ADD BUTTON
                           OutlinedButton.icon(
                             onPressed: () {
-                              controller.addItem(item, (qty + 1).clamp(1, 999));
+                              final success = controller.addItem(item);
 
-                              TopNotification.show(
-                                context,
-                                message: "${item.name} added to order",
-                                color: AppColors.primary,
-                                icon: Icons.check_circle,
-                                 seconds: 5,
-                              );
+                              if (success) {
+                                controller.showInlineNotification(
+                                  "${item.name} added to cart",
+                                  AppColors.primary,
+                                  Icons.check_circle,
+                                );
+                              }
                             },
                             icon: Icon(
                               inCart ? Icons.check : Icons.add,
                               size: 14,
                             ),
-                            label: Text(
-                              inCart ? "Added" : "Add",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                            label: Text(inCart ? "Added" : "Add"),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 6,
                               ),
-                              minimumSize: const Size(
-                                0,
-                                30,
-                              ), 
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              visualDensity: VisualDensity.compact,
-
+                              minimumSize: const Size(0, 30),
                               backgroundColor: inCart
                                   ? AppColors.primary.withOpacity(0.08)
                                   : Colors.transparent,
-
                               side: BorderSide(
                                 color: inCart
                                     ? AppColors.primary
                                     : Colors.grey.shade300,
-                                width: 1,
                               ),
-
                               foregroundColor: inCart
                                   ? AppColors.primary
                                   : Colors.black87,
-
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                  6,
-                                ), // pill shape
+                                borderRadius: BorderRadius.circular(6),
                               ),
                             ),
                           ),

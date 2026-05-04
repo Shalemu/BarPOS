@@ -174,6 +174,35 @@ class _OrderCardState extends State<OrderCard> {
                     onPressed: () {
                       final orderId = order['orderId'];
 
+                      print("\n========== ADD ITEMS DEBUG ==========");
+                      print("Order ID: $orderId");
+                      print("Order Ref: ${order['orderRef']}");
+                      print("Table Ref: ${order['tableRef']}");
+                      print("Status: ${order['orderStatus']}");
+                      print("Created At: ${order['createdAt']}");
+
+                      print("\n------ ITEMS INSIDE ORDER ------");
+
+                      final items = order['items'] ?? [];
+
+                      for (var item in items) {
+                        print("Item Name: ${item['itemName'] ?? item['name']}");
+                        print("  ID: ${item['itemId']}");
+                        print("  Category: ${item['itemCategory']}");
+                        print("  Qty Ordered: ${item['itemQty']}");
+
+                        // 🔥 STOCK INFO (from API or stored response)
+                        print(
+                          "  Remaining Stock: ${item['remainingQty'] ?? 'N/A'}",
+                        );
+                        print(
+                          "  Initial Stock: ${item['stock']?['initial'] ?? 'N/A'}",
+                        );
+                        print("-----------------------------------");
+                      }
+
+                      print("====================================\n");
+
                       Get.toNamed('/add-items', arguments: order)?.then((
                         result,
                       ) {
@@ -249,7 +278,6 @@ class _OrderCardState extends State<OrderCard> {
                   children: [
                     Text("${item.name} x${item.qty}"),
                     Text("TZS ${NumberFormat("#,##0").format(item.price)}"),
-                     
                   ],
                 ),
               );
