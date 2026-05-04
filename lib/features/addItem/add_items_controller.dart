@@ -20,6 +20,9 @@ class AddItemsController extends GetxController {
 
   final RxString productSearch = "".obs;
 
+  final isFetchingProducts = false.obs;
+  final isSubmitting = false.obs;
+
   // UI NOTIFICATION
   final RxString sheetMessage = "".obs;
   final RxBool showSheetMessage = false.obs;
@@ -29,9 +32,9 @@ class AddItemsController extends GetxController {
   late int orderId;
   late String orderRef;
 
-  //  INIT 
+  //  INIT
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
 
     final args = Get.arguments;
@@ -44,32 +47,58 @@ class AddItemsController extends GetxController {
     orderId = args['orderId'] ?? 0;
     orderRef = args['orderRef'] ?? '';
 
-    final items = (args['items'] ?? []) as List<dynamic>;
+    final counterProvider = Get.find<CounterProvider>();
+    final counterId = counterProvider.selectedCounterId.value;
 
-    selectedItems.assignAll(
-      items.map((item) {
-        final product = homeController.products.firstWhereOrNull(
-          (p) => p.id == item['itemId'],
-        );
+    if (counterId == null) {
+      _notify("No counter selected", Colors.red, Icons.warning);
+      return;
+    }
 
-        final stock = product?.availableQty ?? 0;
+    try {
+     isFetchingProducts.value = true;
 
-        return OrderItem(
-          id: item['itemId'],
-          name: item['itemName'] ?? '',
-          logo: item['itemLogo'] ?? '',
-          price: (item['itemPrice'] as num? ?? 0).toDouble(),
-          qty: item['itemQty'] ?? 1,
-          category: item['itemCategory'] ?? '',
-          remainingQty: stock,
-        );
-      }).toList(),
-    );
 
-    fetchProducts();
+      if (homeController.products.isEmpty) {
+        print("Loading products from HomeController...");
+        await homeController.loadProducts(counterId);
+      }
+
+      await fetchProducts();
+
+      final items = (args['items'] ?? []) as List<dynamic>;
+
+      selectedItems.assignAll(
+        items.map((item) {
+          final product = homeController.products.firstWhereOrNull(
+            (p) => p.id == item['itemId'],
+          );
+
+          final stock = product?.availableQty ?? 0;
+
+          print("MAP ITEM: ${item['itemName']} → STOCK: $stock");
+
+          return OrderItem(
+            id: item['itemId'],
+            name: item['itemName'] ?? '',
+            logo: item['itemLogo'] ?? '',
+            price: (item['itemPrice'] as num? ?? 0).toDouble(),
+            qty: item['itemQty'] ?? 1,
+            category: item['itemCategory'] ?? '',
+            remainingQty: stock,
+            volume: item['itemVolume'] ?? item['volume'] ?? '',
+            
+          );
+        }).toList(),
+      );
+    } catch (e) {
+      _notify("Initialization failed", Colors.red, Icons.error);
+    } finally {
+      isFetchingProducts.value = false;
+    }
   }
 
-  // FETCH PRODUCTS 
+  // FETCH PRODUCTS
   Future<void> fetchProducts() async {
     final auth = Get.find<AuthProvider>();
     final counter = Get.find<CounterProvider>();
@@ -97,6 +126,7 @@ class AddItemsController extends GetxController {
             qty: 1,
             category: e.category,
             remainingQty: e.availableQty,
+            volume: e.volume,
           );
         }).toList(),
       );
@@ -106,7 +136,6 @@ class AddItemsController extends GetxController {
       _notify("Failed to load products", Colors.red, Icons.error);
     }
   }
-
 
   void setProductSearch(String value) {
     productSearch.value = value;
@@ -123,69 +152,60 @@ class AddItemsController extends GetxController {
     }).toList();
   }
 
- bool addItem(OrderItem item) {
-  final index = selectedItems.indexWhere(
-    (e) => e.uniqueId == item.uniqueId,
-  );
+  bool addItem(OrderItem item) {
+    final index = selectedItems.indexWhere((e) => e.uniqueId == item.uniqueId);
 
-  final existingQty = index != -1 ? selectedItems[index].qty : 0;
+    final existingQty = index != -1 ? selectedItems[index].qty : 0;
+    final newQty = existingQty + 1;
 
-  final product = homeController.products.firstWhereOrNull(
-    (p) => p.id == item.id,
-  );
+    print("Item: ${item.name}");
+    print("Category: ${item.category}");
+    print("Current Qty: $existingQty");
+    print("Trying Qty: $newQty");
 
-  final stock = product?.availableQty ?? 0;
-  final newQty = existingQty + 1;
+    if (item.category.toLowerCase() == "product") {
+      final product = homeController.products.firstWhereOrNull(
+        (p) => p.id == item.id,
+      );
 
+      final stock = product?.availableQty ?? 0;
 
-  print("Item: ${item.name}");
-  print("Current Qty: $existingQty");
-  print("Stock Available: $stock");
-  print("Trying Qty: $newQty");
+      print("Stock Available: $stock");
 
-  if (stock <= 0) {
-    print("OUT OF STOCK");
-    _notify("Out of stock", Colors.red, Icons.warning_amber);
-    return false;
+      if (stock <= 0) {
+        print("OUT OF STOCK");
+        _notify("Out of stock", Colors.red, Icons.warning_amber);
+        return false;
+      }
+
+      if (newQty > stock) {
+        print("LIMIT EXCEEDED");
+        _notify(
+          "Only $stock ${item.name} available",
+          Colors.red,
+          Icons.warning_amber,
+        );
+        return false;
+      }
+    }
+
+    if (index != -1) {
+      selectedItems[index] = selectedItems[index].copyWith(qty: newQty);
+    } else {
+      selectedItems.add(item.copyWith(qty: 1));
+    }
+
+    selectedItems.refresh();
+
+    print("ITEM ADDED SUCCESS");
+
+    _notify("${item.name} added", Colors.green, Icons.check_circle);
+
+    return true;
   }
-
-  if (newQty > stock) {
-    print("LIMIT EXCEEDED");
-    _notify(
-      "Only $stock ${item.name} available",
-      Colors.red,
-      Icons.warning_amber,
-    );
-    return false;
-  }
-
-  // ADD / UPDATE
-  if (index != -1) {
-    selectedItems[index] =
-        selectedItems[index].copyWith(qty: newQty);
-  } else {
-    selectedItems.add(item.copyWith(qty: 1));
-  }
-
-  selectedItems.refresh();
-
-  print("ITEM ADDED SUCCESS");
-
- 
-  _notify(
-    "${item.name} added",
-    Colors.green,
-    Icons.check_circle,
-  );
-
-  return true;
-}
-
 
   void decreaseItem(OrderItem item) {
-    final index = selectedItems.indexWhere(
-      (e) => e.uniqueId == item.uniqueId,
-    );
+    final index = selectedItems.indexWhere((e) => e.uniqueId == item.uniqueId);
 
     if (index == -1) return;
 
@@ -194,25 +214,22 @@ class AddItemsController extends GetxController {
     if (qty <= 1) {
       selectedItems.removeAt(index);
     } else {
-      selectedItems[index] =
-          selectedItems[index].copyWith(qty: qty - 1);
+      selectedItems[index] = selectedItems[index].copyWith(qty: qty - 1);
     }
 
     selectedItems.refresh();
   }
 
-  //REMOVE 
+  //REMOVE
   void removeItem(OrderItem item) {
-    selectedItems.removeWhere(
-      (e) => e.uniqueId == item.uniqueId,
-    );
+    selectedItems.removeWhere((e) => e.uniqueId == item.uniqueId);
 
     selectedItems.refresh();
 
     _notify("Item removed", Colors.orange, Icons.remove_circle);
   }
 
-  // SUBMIT 
+  // SUBMIT
   Future<void> submit() async {
     final auth = Get.find<AuthProvider>();
 
@@ -222,7 +239,7 @@ class AddItemsController extends GetxController {
     }
 
     try {
-      isLoading.value = true;
+      isSubmitting.value = true;
 
       final payload = selectedItems.map((e) {
         return {
@@ -235,7 +252,6 @@ class AddItemsController extends GetxController {
         };
       }).toList();
 
-     
       for (var i in payload) {
         print(i);
       }
@@ -248,17 +264,15 @@ class AddItemsController extends GetxController {
 
       Get.back(result: true);
 
-      _notify("Order updated successfully", Colors.green,
-          Icons.check_circle);
-
+      _notify("Order updated successfully", Colors.green, Icons.check_circle);
     } catch (e) {
       _notify("Update failed", Colors.red, Icons.error);
     } finally {
-      isLoading.value = false;
+      isSubmitting.value = false;
     }
   }
 
-  // NOTIFICATION 
+  // NOTIFICATION
   void _notify(String msg, Color color, IconData icon) {
     sheetMessage.value = msg;
     sheetMessageColor.value = color;
@@ -271,6 +285,6 @@ class AddItemsController extends GetxController {
   }
 
   void showInlineNotification(String message, Color color, IconData icon) {
-  _notify(message, color, icon);
-}
+    _notify(message, color, icon);
+  }
 }

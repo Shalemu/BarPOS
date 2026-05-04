@@ -8,6 +8,7 @@ class OrderItem {
   final int qty;
   final String category;
   final int remainingQty;
+ final String? volume;
 
   OrderItem({
     required this.id,
@@ -17,6 +18,7 @@ class OrderItem {
     required this.qty,
     required this.category,
     required this.remainingQty,
+      this.volume,
   });
 
   String get uniqueId => "$category-$id";
@@ -30,6 +32,7 @@ class OrderItem {
       qty: json['itemQty'] ?? 1,
       category: json['itemCategory'] ?? json['category'] ?? 'product',
       remainingQty: json['remainingQty'] ?? 0,
+        volume: json['volume']?.toString(),
     );
   }
 
@@ -41,6 +44,7 @@ class OrderItem {
     int? qty,
     String? category,
     int? remainingQty,
+    String? volume,
   }) {
     return OrderItem(
       id: id ?? this.id,
@@ -50,20 +54,22 @@ class OrderItem {
       qty: qty ?? this.qty,
       category: category ?? this.category,
       remainingQty: remainingQty ?? this.remainingQty,
+      volume: volume ?? this.volume,
     );
   }
 
   OrderItem enrichOrderItem(Map item, Map<int, ProductModel> productMap) {
-  final product = productMap[item['itemId']];
+    final product = productMap[item['itemId']];
 
-  return OrderItem(
-    id: item['itemId'],
-    name: item['itemName'] ?? '',
-    logo: item['itemLogo'] ?? '',
-    price: (item['itemPrice'] ?? 0).toDouble(),
-    qty: item['itemQty'] ?? 1,
-    category: item['itemCategory'] ?? '',
-    remainingQty: product?.availableQty ?? 0,
-  );
-}
+    return OrderItem(
+      id: item['itemId'],
+      name: item['itemName'] ?? '',
+      logo: item['itemLogo'] ?? '',
+      price: (item['itemPrice'] ?? 0).toDouble(),
+      qty: item['itemQty'] ?? 1,
+      category: item['itemCategory'] ?? '',
+      remainingQty: product?.availableQty ?? 0,
+      volume: product?.volume ?? '',
+    );
+  }
 }

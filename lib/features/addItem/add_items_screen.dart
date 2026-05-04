@@ -36,6 +36,10 @@ class AddItemsScreen extends GetView<AddItemsController> {
 
           Expanded(
             child: Obx(() {
+              if (controller.isFetchingProducts.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
               final items = controller.selectedItems;
 
               if (items.isEmpty) {
@@ -165,7 +169,6 @@ class AddItemsScreen extends GetView<AddItemsController> {
     );
   }
 
-  // ================= EMPTY STATE =================
   Widget _emptyState() {
     return Center(
       child: Column(
@@ -191,7 +194,6 @@ class AddItemsScreen extends GetView<AddItemsController> {
     );
   }
 
-  // ================= ITEM CARD =================
   Widget _itemCard(OrderItem item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -232,18 +234,35 @@ class AddItemsScreen extends GetView<AddItemsController> {
                         .firstWhereOrNull((e) => e.uniqueId == item.uniqueId)
                         ?.qty ??
                     0;
+                final volumeText = (item.volume ?? '').trim();
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: item.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+
+                          if (volumeText.isNotEmpty)
+                            TextSpan(
+                              text: " ($volumeText ml)",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
-
                     const SizedBox(height: 4),
 
                     Text(
@@ -261,7 +280,7 @@ class AddItemsScreen extends GetView<AddItemsController> {
                     const SizedBox(height: 4),
 
                     Text(
-                      "Stock: ${item.remainingQty}",
+                      "Available: ${item.remainingQty}",
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -292,56 +311,57 @@ class AddItemsScreen extends GetView<AddItemsController> {
     );
   }
 
-Widget _qtyBox(OrderItem item) {
-  final qty = controller.selectedItems
-          .firstWhereOrNull((e) => e.uniqueId == item.uniqueId)
-          ?.qty ??
-      0;
+  Widget _qtyBox(OrderItem item) {
+    final qty =
+        controller.selectedItems
+            .firstWhereOrNull((e) => e.uniqueId == item.uniqueId)
+            ?.qty ??
+        0;
 
-  return Container(
-    padding: const EdgeInsets.all(4),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF7F7F7),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      children: [
-        _qtyBtn(Icons.remove, () {
-          print("🟡 CLICK: DECREASE ITEM");
-          print("Item: ${item.name}");
-          print("Current Qty: $qty");
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F7F7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _qtyBtn(Icons.remove, () {
+            print("CLICK: DECREASE ITEM");
+            print("Item: ${item.name}");
+            print("Current Qty: $qty");
 
-          if (qty > 1) {
-            controller.decreaseItem(item);
-          } else {
-            controller.removeItem(item);
-          }
+            if (qty > 1) {
+              controller.decreaseItem(item);
+            } else {
+              controller.removeItem(item);
+            }
 
-          print("ACTION: decrease/remove executed");
-        }),
+            print("ACTION: decrease/remove executed");
+          }),
 
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
-            "$qty",
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              "$qty",
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
-        ),
 
-        _qtyBtn(Icons.add, () {
-          print("CLICK: ADD ITEM");
-          print("Item: ${item.name}");
-          print("Current Qty: $qty");
-          print("Remaining Stock: ${item.remainingQty}");
+          _qtyBtn(Icons.add, () {
+            print("CLICK: ADD ITEM");
+            print("Item: ${item.name}");
+            print("Current Qty: $qty");
+            print("Remaining Stock: ${item.remainingQty}");
 
-          controller.addItem(item);
+            controller.addItem(item);
 
-          print("ACTION: addItem executed");
-        }, active: true),
-      ],
-    ),
-  );
-}
+            print("ACTION: addItem executed");
+          }, active: true),
+        ],
+      ),
+    );
+  }
 
   Widget _qtyBtn(IconData icon, VoidCallback onTap, {bool active = false}) {
     return InkWell(
@@ -362,7 +382,7 @@ Widget _qtyBox(OrderItem item) {
     );
   }
 
-  // ================= BOTTOM BAR =================
+  // BOTTOM BAR
   Widget _bottomBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 22),
@@ -382,7 +402,7 @@ Widget _qtyBox(OrderItem item) {
       ),
       child: SafeArea(
         child: Obx(() {
-          final loading = controller.isLoading.value;
+          final loading = controller.isSubmitting.value;
 
           return SizedBox(
             height: 52,
@@ -396,7 +416,14 @@ Widget _qtyBox(OrderItem item) {
                 ),
               ),
               child: loading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
                   : const Text(
                       "UPDATE ORDER",
                       style: TextStyle(
