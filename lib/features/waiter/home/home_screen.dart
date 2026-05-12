@@ -1,22 +1,23 @@
+import 'package:barpos/core/bottom_nav_controller.dart';
 import 'package:barpos/core/constants/app_colors.dart';
-import 'package:barpos/core/widgets/counter_items.dart';
-import 'package:barpos/core/widgets/counter_select.dart';
-import 'package:barpos/features/cart/cart_screen.dart';
+import 'package:barpos/core/widgets/waiter/counter_items.dart';
+import 'package:barpos/core/widgets/waiter/counter_select.dart';
+import 'package:barpos/features/waiter/cart/cart_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:barpos/features/home/bottom_nav_controller.dart';
-import 'package:barpos/features/home/home_controller.dart';
-import 'package:barpos/features/orders/orders_screen.dart';
+
+import 'package:barpos/features/waiter/home/home_controller.dart';
+import 'package:barpos/features/waiter/orders/orders_screen.dart';
 import 'package:barpos/features/profile/profile_screen.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class WaiterHomeScreen extends StatelessWidget {
+  const WaiterHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final navController = Get.find<BottomNavController>();
-    final homeController = Get.find<HomeController>();
+    final homeController = Get.find<WaiterHomeController>();
     final cartController = homeController.cartController;
 
     final pages = [

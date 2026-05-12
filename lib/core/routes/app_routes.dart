@@ -12,11 +12,14 @@ class AppRoutes {
 
 
   // Main
-  static const home = '/home';
+   // WAITER
+  static const waiterHome = '/waiter-home';
+  // COUNTER
+  static const counterHome = '/counter-home';
 
   // Bottom navigation screens
-  static const cart = '/cart';
-  static const orders = '/orders';
+  static const cart = '/waiter-cart';
+  static const orders = '/waiter-orders';
   static const profile = '/profile';
 
   // Other

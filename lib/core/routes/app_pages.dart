@@ -1,5 +1,7 @@
-import 'package:barpos/features/addItem/add_items_binding.dart';
-import 'package:barpos/features/addItem/add_items_screen.dart';
+import 'package:barpos/features/counter/home/home_binding.dart';
+import 'package:barpos/features/counter/home/home_screen.dart';
+import 'package:barpos/features/waiter/addItem/add_items_binding.dart';
+import 'package:barpos/features/waiter/addItem/add_items_screen.dart';
 import 'package:barpos/features/auth/forget_password/forget_password.binding.dart';
 import 'package:barpos/features/auth/forget_password/forget_password_screen.dart';
 import 'package:barpos/features/auth/forget_password/reset_password_screen.dart';
@@ -17,16 +19,16 @@ import '../../features/auth/register/register_screen.dart';
 import '../../features/auth/register/register_binding.dart';
 
 // HOME
-import '../../features/home/home_screen.dart';
-import '../../features/home/home_binding.dart';
+import '../../features/waiter/home/home_screen.dart';
+import '../../features/waiter/home/home_binding.dart';
 
 // CART
-import '../../features/cart/cart_screen.dart';
-import '../../features/cart/cart_binding.dart';
+import '../../features/waiter/cart/cart_screen.dart';
+import '../../features/waiter/cart/cart_binding.dart';
 
 // ORDERS
-import '../../features/orders/orders_screen.dart';
-import '../../features/orders/orders_binding.dart';
+import '../../features/waiter/orders/orders_screen.dart';
+import '../../features/waiter/orders/orders_binding.dart';
 
 // PROFILE
 import '../../features/profile/profile_screen.dart';
@@ -76,11 +78,18 @@ class AppPages {
       binding: ForgotPasswordBinding(),
     ),
     // HOME
-    GetPage(
-      name: AppRoutes.home,
-      page: () => const HomeScreen(),
-      binding: HomeBinding(),
-    ),
+  GetPage(
+  name: AppRoutes.waiterHome,
+  page: () => const WaiterHomeScreen(),
+  binding: WaiterHomeBinding(),
+),
+
+// COUNTER
+GetPage(
+  name: AppRoutes.counterHome,
+  page: () => const CounterHomeScreen(),
+  binding: CounterHomeBinding(),
+),
 
     // CART
     GetPage(

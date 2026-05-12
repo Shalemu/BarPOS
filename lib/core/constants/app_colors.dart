@@ -20,4 +20,7 @@ class AppColors {
   // Optional accent (you can keep or remove)
   static const Color orange = Color(0xFFCFA224); // aligned to brand
   static const Color lightblue = Color(0xFFCFA224); // aligned to brand
+
+    static const Color textPrimary = black;
+  static const Color textSecondary = blackshade;
 }

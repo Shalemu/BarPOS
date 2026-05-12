@@ -10,6 +10,9 @@ class UserModel {
   final String token;
   final CounterModel counter;
 
+    final String role;
+  final List<String> permissions;
+
   UserModel({
     required this.firstName,
     required this.middleName,
@@ -18,6 +21,8 @@ class UserModel {
     required this.email,
     required this.userType,
     required this.token,
+    required this.role,
+    required this.permissions,
     required this.counter,
   });
 
@@ -30,6 +35,13 @@ class UserModel {
       email: json["email"] ?? "",
       userType: json["userType"] ?? "",
       token: json["token"] ?? "",
+
+
+            role: json["role"] ?? "",
+
+      permissions: json["permissions"] != null
+          ? List<String>.from(json["permissions"])
+          : [],
 
     
       counter: CounterModel.fromJson(json["counter"] ?? {}),
@@ -45,6 +57,8 @@ class UserModel {
       "email": email,
       "userType": userType,
       "token": token,
+      "role": role,
+      "permissions": permissions,
 
       // optional
       "counter": {

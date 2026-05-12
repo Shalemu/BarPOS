@@ -1,17 +1,17 @@
-import 'package:barpos/features/home/home_controller.dart';
+import 'package:barpos/features/waiter/home/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:barpos/services/model/order_item.dart';
-import 'package:barpos/services/order_service.dart';
-import 'package:barpos/services/product_service.dart';
+import 'package:barpos/services/waiter/order_service.dart';
+import 'package:barpos/services/waiter/product_service.dart';
 import 'package:barpos/provider/auth_provider.dart';
-import 'package:barpos/provider/counter_provider.dart';
+import 'package:barpos/provider/waiter/counter_provider.dart';
 
 class AddItemsController extends GetxController {
   final OrderService _service = OrderService();
   final ProductService _productService = ProductService();
-  final HomeController homeController = Get.find<HomeController>();
+  final WaiterHomeController homeController = Get.find<WaiterHomeController>();
 
   final isLoading = false.obs;
 

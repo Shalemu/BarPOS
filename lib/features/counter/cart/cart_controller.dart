@@ -1,4 +1,4 @@
-import 'package:barpos/provider/counter_provider.dart';
+import 'package:barpos/provider/waiter/counter_provider.dart';
 import 'package:barpos/services/model/cart_model.dart';
 import 'package:barpos/services/model/product_model.dart';
 import 'package:barpos/core/widgets/top_notification.dart';

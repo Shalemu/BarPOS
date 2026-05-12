@@ -1,3 +1,4 @@
+import 'package:barpos/provider/counter/counter_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -6,7 +7,7 @@ import 'core/routes/app_pages.dart';
 import 'core/routes/app_routes.dart';
 
 import 'provider/auth_provider.dart';
-import 'provider/counter_provider.dart';
+import 'provider/waiter/counter_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,7 @@ Future<void> main() async {
  
     Get.put(AuthProvider(), permanent: true);
     Get.put(CounterProvider());
+    Get.put(MyCounterProvider());
 
     /// LOAD AUTH STATE
     final authProvider = Get.find<AuthProvider>();

@@ -15,7 +15,7 @@ class ApiConstants {
   static const String resetPassword = "$baseUrl/reset-password";
 
 
-  // counter liost
+  // counter list
    static const String fetchCounter = "$baseUrl/counters";
 
   // productlist
@@ -24,5 +24,12 @@ class ApiConstants {
   static const String submitOrder = "$baseUrl/orders/collect";
   static const String fetchOrder = "$baseUrl/orders/my-orders";
   static const String cancelOrder = "$baseUrl/orders";
+  
+  //counter orders
+  static const String fetchCounterOrders = "$baseUrl/counters";
+
+  //my counter
+  static const String myCounter = "$baseUrl/counters/my-counters";
+
   
 }

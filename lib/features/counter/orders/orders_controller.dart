@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:barpos/provider/auth_provider.dart';
-import 'package:barpos/provider/counter_provider.dart';
-import 'package:barpos/services/order_service.dart';
+import 'package:barpos/provider/waiter/counter_provider.dart';
+import 'package:barpos/services/waiter/order_service.dart';
 
 class OrdersController extends GetxController {
   final OrderService _service = OrderService();

@@ -1,5 +1,5 @@
 import 'package:barpos/core/constants/app_colors.dart';
-import 'package:barpos/features/orders/orders_controller.dart';
+import 'package:barpos/features/waiter/orders/orders_controller.dart';
 import 'package:barpos/services/model/order_item.dart';
 import 'package:flutter/material.dart';
 import 'package:barpos/core/widgets/progress.dart';

@@ -1,13 +1,13 @@
-import 'package:barpos/features/cart/cart_controller.dart';
+import 'package:barpos/features/waiter/cart/cart_controller.dart';
 import 'package:barpos/provider/auth_provider.dart';
-import 'package:barpos/provider/counter_provider.dart';
-import 'package:barpos/services/counter_service.dart';
+import 'package:barpos/provider/waiter/counter_provider.dart';
+import 'package:barpos/services/waiter/counter_service.dart';
 import 'package:barpos/services/model/counters_model.dart';
 import 'package:barpos/services/model/product_model.dart';
-import 'package:barpos/services/product_service.dart';
+import 'package:barpos/services/waiter/product_service.dart';
 import 'package:get/get.dart';
 
-class HomeController extends GetxController {
+class WaiterHomeController extends GetxController {
   // DATA
 
   var counters = <CounterModel>[].obs;

@@ -1,5 +1,5 @@
 import 'package:barpos/core/constants/app_colors.dart';
-import 'package:barpos/features/addItem/add_items_controller.dart';
+import 'package:barpos/features/waiter/addItem/add_items_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

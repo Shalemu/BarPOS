@@ -47,29 +47,30 @@ Future<void> loadFromPrefs() async {
 }
 
   // SAVE AUTH (LOGIN)
-  Future<void> saveAuth({
-    required UserModel userData,
-    required String token,
-    String? refresh,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
+ Future<void> saveAuth({
+  required UserModel userData,
+  required String token,
+  String? refresh,
+}) async {
+  final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString('user', jsonEncode(userData.toJson()));
-    await prefs.setString('access_token', token);
+  // Save full user (includes role + permissions if model has them)
+  await prefs.setString('user', jsonEncode(userData.toJson()));
 
-    if (refresh != null) {
-      await prefs.setString('refresh_token', refresh);
-    }
+  await prefs.setString('access_token', token);
 
-    user.value = userData;
-    accessToken.value = token;
-    refreshToken.value = refresh;
-
-    print("Token saved: $token");
-
-    // Navigate after login
-    Get.offAllNamed(AppRoutes.home);
+  if (refresh != null) {
+    await prefs.setString('refresh_token', refresh);
   }
+
+  user.value = userData;
+  accessToken.value = token;
+  refreshToken.value = refresh;
+
+  print("AUTH SAVED");
+  print("ROLE: ${userData.role}");
+  print("PERMISSIONS: ${userData.permissions}");
+}
 
   // LOGOUT
   Future<void> logout() async {

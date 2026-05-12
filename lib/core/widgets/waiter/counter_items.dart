@@ -1,17 +1,17 @@
 import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/core/widgets/dot_loader.dart';
 import 'package:barpos/core/widgets/top_notification.dart';
-import 'package:barpos/features/cart/cart_controller.dart';
+import 'package:barpos/features/waiter/cart/cart_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:barpos/features/home/home_controller.dart';
+import 'package:barpos/features/waiter/home/home_controller.dart';
 
 class CounterItemsWidget extends StatelessWidget {
   const CounterItemsWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<HomeController>();
+    final controller = Get.find<WaiterHomeController>();
 
     return Column(
       children: [
@@ -28,12 +28,13 @@ class CounterItemsWidget extends StatelessWidget {
               filled: true,
               fillColor: Colors.grey.shade100,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide.none,
               ),
             ),
           ),
         ),
+
         const SizedBox(height: 12),
 
         // CATEGORY FILTER
@@ -41,7 +42,7 @@ class CounterItemsWidget extends StatelessWidget {
           final categories = controller.categories;
 
           return SizedBox(
-            height: 42,
+            height: 44,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -51,34 +52,32 @@ class CounterItemsWidget extends StatelessWidget {
 
                 final isSelected =
                     controller.selectedCategory.value.toLowerCase().trim() ==
-                    category.toLowerCase().trim();
+                        category.toLowerCase().trim();
 
                 return GestureDetector(
-                  onTap: () {
-                    controller.changeCategory(category);
-                  },
+                  onTap: () => controller.changeCategory(category),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeInOut,
-
                     margin: const EdgeInsets.only(right: 10),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
 
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.black : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(10),
-
-                      border: isSelected
-                          ? Border.all(color: Colors.black, width: 1)
-                          : null,
-
+                      color: isSelected
+                          ? AppColors.primary
+                          : Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                      ),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 6,
-                                offset: const Offset(0, 3),
-                              ),
+                                color: AppColors.primary.withOpacity(0.25),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              )
                             ]
                           : [],
                     ),
@@ -120,7 +119,7 @@ class CounterItemsWidget extends StatelessWidget {
               itemCount: controller.filteredProducts.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.72,
+               childAspectRatio: 0.6,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
               ),
@@ -130,39 +129,48 @@ class CounterItemsWidget extends StatelessWidget {
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.grey.shade200,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.06),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      // IMAGE
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(18),
-                        ),
-                        child: Container(
-                          height: 90,
-                          width: double.infinity,
+                      /// ---------------- IMAGE INNER CARD ----------------
+                      Container(
+                        height: 110,
+                        margin: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
                           color: Colors.grey.shade100,
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
                           child: Image.network(
                             item.logo,
                             fit: BoxFit.cover,
+                            width: double.infinity,
                             errorBuilder: (_, __, ___) =>
                                 const Icon(Icons.image),
                           ),
                         ),
                       ),
 
-                      // CONTENT
+                      /// ---------------- CONTENT ----------------
                       Padding(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -190,7 +198,7 @@ class CounterItemsWidget extends StatelessWidget {
                             const SizedBox(height: 4),
 
                             Text(
-                              "Available: ${item.availableQty}",
+                              "Stock: ${item.availableQty}",
                               style: TextStyle(
                                 fontSize: 11,
                                 color: item.availableQty < 5
@@ -209,66 +217,48 @@ class CounterItemsWidget extends StatelessWidget {
 
                             const SizedBox(height: 10),
 
-                            // CART CONTROLS
+                            /// ---------------- CART BUTTON ----------------
                             Obx(() {
-                              final cartController = Get.find<CartController>();
+                              final cartController =
+                                  Get.find<CartController>();
 
                               final cartItem = cartController.cartItems
                                   .firstWhereOrNull(
-                                    (e) => e.uniqueId == item.uniqueId,
-                                  );
+                                (e) => e.uniqueId == item.uniqueId,
+                              );
 
                               final qty = cartItem?.quantity ?? 0;
 
                               if (qty == 0) {
                                 return GestureDetector(
                                   onTap: () {
-                                    final msg = cartController.addToCart(
-                                      context,
-                                      item,
-                                    );
-
-                                    print(" ADD CLICKED");
-                                    print("ID: ${item.id}");
-                                    print("CATEGORY: ${item.category}");
-                                    print("UNIQUE: ${item.uniqueId}");
-                                    print(
-                                      "CURRENT CART SIZE: ${cartController.cartItems.length}",
-                                    );
-
-                                    for (var c in cartController.cartItems) {
-                                      print(
-                                        "🛒 CART ITEM => ${c.uniqueId} | qty=${c.quantity}",
-                                      );
-                                    }
+                                    final msg =
+                                        cartController.addToCart(context, item);
 
                                     if (msg != null) {
                                       TopNotification.show(
-                                      context,
+                                        context,
                                         message: msg,
                                         color: Colors.red,
                                         icon: Icons.warning,
-                                        seconds: 5,
+                                        seconds: 4,
                                       );
                                     }
                                   },
                                   child: Container(
-                                    height: 36,
+                                    height: 38,
                                     decoration: BoxDecoration(
-                                      color: Colors.black,
-                                      borderRadius: BorderRadius.circular(10),
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: const Center(
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Icon(
-                                            Icons.add,
-                                            color: Colors.white,
-                                            size: 18,
-                                          ),
-                                          SizedBox(width: 4),
+                                          Icon(Icons.add,
+                                              color: Colors.white, size: 18),
+                                          SizedBox(width: 6),
                                           Text(
                                             "Add",
                                             style: TextStyle(
@@ -284,28 +274,23 @@ class CounterItemsWidget extends StatelessWidget {
                               }
 
                               return Container(
-                                height: 36,
+                                height: 38,
                                 decoration: BoxDecoration(
                                   color: Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Row(
                                   children: [
-                                    Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: () => cartController.decreaseQty(
-                                          context,
-                                          item.uniqueId,
-                                        ),
-                                        child: const SizedBox(
-                                          width: 36,
-                                          height: 36,
-                                          child: Icon(Icons.remove, size: 18),
-                                        ),
+                                    InkWell(
+                                      onTap: () => cartController.decreaseQty(
+                                        context,
+                                        item.uniqueId,
+                                      ),
+                                      child: const SizedBox(
+                                        width: 40,
+                                        child: Icon(Icons.remove, size: 18),
                                       ),
                                     ),
-
                                     Expanded(
                                       child: Center(
                                         child: Text(
@@ -316,35 +301,25 @@ class CounterItemsWidget extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-
-                                    Material(
-                                      color: Colors.black,
-                                      child: InkWell(
-                                        onTap: () {
-                                          final msg = cartController
-                                              .increaseQty(
-                                                context,
-                                                item.uniqueId,
-                                                item,
-                                              );
-
-                                          if (msg != null) {
-                                            Get.snackbar(
-                                              "Stock Limit",
-                                              msg,
-                                              snackPosition:
-                                                  SnackPosition.BOTTOM,
-                                            );
-                                          }
-                                        },
-                                        child: const SizedBox(
-                                          width: 36,
-                                          height: 36,
-                                          child: Icon(
-                                            Icons.add,
-                                            color: Colors.white,
-                                            size: 18,
+                                    InkWell(
+                                      onTap: () => cartController.increaseQty(
+                                        context,
+                                        item.uniqueId,
+                                        item,
+                                      ),
+                                      child: Container(
+                                        width: 40,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.black,
+                                          borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(12),
+                                            bottomRight: Radius.circular(12),
                                           ),
+                                        ),
+                                        child: const Icon(
+                                          Icons.add,
+                                          color: Colors.white,
+                                          size: 18,
                                         ),
                                       ),
                                     ),
@@ -355,6 +330,8 @@ class CounterItemsWidget extends StatelessWidget {
                           ],
                         ),
                       ),
+
+                      const SizedBox(height: 10),
                     ],
                   ),
                 );

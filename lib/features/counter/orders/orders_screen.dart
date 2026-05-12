@@ -1,6 +1,6 @@
 import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/core/widgets/app_search_bar.dart';
-import 'package:barpos/core/widgets/order_card.dart';
+import 'package:barpos/core/widgets/waiter/order_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'orders_controller.dart';

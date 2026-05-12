@@ -1,7 +1,6 @@
 import 'package:barpos/core/widgets/dot_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../provider/auth_provider.dart';
@@ -20,20 +19,48 @@ class _SplashScreenState extends State<SplashScreen> {
     _initApp();
   }
 
-  Future<void> _initApp() async {
-    final authProvider = Get.find<AuthProvider>();
+ Future<void> _initApp() async {
+  final authProvider = Get.find<AuthProvider>();
 
-    while (!authProvider.isInitialized.value) {
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-    if (authProvider.isAuthenticated) {
-      Get.offAllNamed(AppRoutes.home);
-    } else {
-      Get.offAllNamed(AppRoutes.login);
-    }
+  while (!authProvider.isInitialized.value) {
+    await Future.delayed(const Duration(milliseconds: 100));
   }
+
+  await Future.delayed(const Duration(seconds: 2));
+
+  if (!mounted) return;
+
+  // NOT AUTHENTICATED
+  if (!authProvider.isAuthenticated) {
+    Get.offAllNamed(AppRoutes.login);
+    return;
+  }
+
+  final user = authProvider.user.value;
+
+  if (user == null) {
+    Get.offAllNamed(AppRoutes.login);
+    return;
+  }
+
+  final permissions = user.permissions;
+
+  // COUNTER (order picker / kitchen / bar processing)
+  if (permissions.contains('order.pick')) {
+    Get.offAllNamed(AppRoutes.counterHome);
+    return;
+  }
+
+  // WAITER / CASHIER / POS USER
+  if (permissions.contains('order.create') ||
+      permissions.contains('pos')) {
+    Get.offAllNamed(AppRoutes.waiterHome);
+    return;
+  }
+
+  // FALLBACK
+  Get.offAllNamed(AppRoutes.login);
+}
 
   @override
   Widget build(BuildContext context) {

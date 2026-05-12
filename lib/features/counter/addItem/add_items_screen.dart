@@ -1,6 +1,6 @@
 import 'package:barpos/core/constants/app_colors.dart';
-import 'package:barpos/core/widgets/add_items_sheet.dart';
-import 'package:barpos/features/addItem/add_items_controller.dart';
+import 'package:barpos/core/widgets/waiter/add_items_sheet.dart';
+import 'package:barpos/features/waiter/addItem/add_items_controller.dart';
 import 'package:barpos/services/model/order_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
