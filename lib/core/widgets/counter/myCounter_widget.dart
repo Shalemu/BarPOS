@@ -96,7 +96,7 @@ class MyCounterSelectionWidget extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            /// TITLE
+           
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -169,7 +169,7 @@ class MyCounterSelectionWidget extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          /// TOP ROW
+                       
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -186,7 +186,7 @@ class MyCounterSelectionWidget extends StatelessWidget {
                                 ),
                               ),
 
-                              /// BADGE
+                              // BADGE
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
@@ -210,7 +210,7 @@ class MyCounterSelectionWidget extends StatelessWidget {
 
                           const Spacer(),
 
-                          /// COUNTER NAME
+                          // COUNTER NAME
                           Text(
                             counter.name,
                             maxLines: 1,
@@ -223,7 +223,7 @@ class MyCounterSelectionWidget extends StatelessWidget {
 
                           const SizedBox(height: 6),
 
-                          /// SUBTITLE
+                          // SUBTITLE
                           Row(
                             children: [
                               const Icon(

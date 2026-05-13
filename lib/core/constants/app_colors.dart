@@ -17,7 +17,7 @@ class AppColors {
   static const Color lightblueshade = Color(0xFFA6C0FF);
   static const Color lightsky = Color(0xFFA6C0FF);
 
-  // Optional accent (you can keep or remove)
+ 
   static const Color orange = Color(0xFFCFA224); // aligned to brand
   static const Color lightblue = Color(0xFFCFA224); // aligned to brand
 

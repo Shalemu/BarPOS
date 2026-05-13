@@ -1,4 +1,6 @@
+import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/core/widgets/counter/Progress_status.dart';
+import 'package:barpos/core/widgets/counter/order_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:barpos/features/counter/home/home_controller.dart';
@@ -179,8 +181,13 @@ class CounterOrdersWidget extends StatelessWidget {
                         final order = filteredOrders[index];
 
                         return GestureDetector(
-                          onTap: () =>
-                              _openOrderDialog(context, order, controller),
+                          onTap: () {
+                            OrderDialog.show(
+                              context,
+                              order: order,
+                              controller: controller,
+                            );
+                          },
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 12),
                             padding: const EdgeInsets.all(14),
@@ -254,19 +261,25 @@ class CounterOrdersWidget extends StatelessWidget {
                                 const SizedBox(height: 10),
 
                                 // ACTION BUTTON
+                                // ACTION BUTTON
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton.icon(
-                                    onPressed: () => _openOrderDialog(
+                                    onPressed: () => OrderDialog.show(
                                       context,
-                                      order,
-                                      controller,
+                                      order: order,
+                                      controller: controller,
                                     ),
-                                    icon: const Icon(
-                                      Icons.receipt_long_rounded,
+
+                                    icon: Icon(
+                                      _getButtonIcon(order['order_status']),
                                       size: 18,
                                     ),
-                                    label: const Text("Process Order"),
+
+                                    label: Text(
+                                      _getButtonText(order['order_status']),
+                                    ),
+
                                     style: ElevatedButton.styleFrom(
                                       elevation: 0,
                                       padding: const EdgeInsets.symmetric(
@@ -275,7 +288,9 @@ class CounterOrdersWidget extends StatelessWidget {
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      backgroundColor: Colors.black,
+                                      backgroundColor: _getButtonColor(
+                                        order['order_status'],
+                                      ),
                                       foregroundColor: Colors.white,
                                     ),
                                   ),
@@ -305,6 +320,63 @@ class CounterOrdersWidget extends StatelessWidget {
         return Colors.green;
       default:
         return Colors.grey;
+    }
+  }
+
+  String _getButtonText(String status) {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "Pick Order";
+
+      case "processing":
+        return "Process Order";
+
+      case "completed":
+        return "View Order";
+
+      case "cancelled":
+        return "View Order";
+
+      default:
+        return "Open Order";
+    }
+  }
+
+  IconData _getButtonIcon(String status) {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return Icons.playlist_add_check_rounded;
+
+      case "processing":
+        return Icons.sync_rounded;
+
+      case "completed":
+        return Icons.visibility_rounded;
+
+      case "cancelled":
+        return Icons.visibility_rounded;
+
+      default:
+        return Icons.receipt_long_rounded;
+    }
+  }
+
+  Color _getButtonColor(String status) {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return AppColors.primary;
+
+      case "processing":
+        return AppColors.blue;
+
+      case "completed":
+        return Colors.green;
+
+      case "cancelled":
+        return Colors.red;
+
+      default:
+        return Colors.black;
     }
   }
 
@@ -341,89 +413,6 @@ class CounterOrdersWidget extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  void _openOrderDialog(BuildContext context, Map order, controller) {
-    final List items = order['items'] ?? [];
-
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: Text("Order #${order['order_ref']}"),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text("Table: ${order['table_ref'] ?? '-'}"),
-                Text("Payment Status: ${order['payment_status'] ?? '-'}"),
-                const SizedBox(height: 10),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "${getTotalItems(items)} item(s)",
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                    Text(
-                      "TZS ${getTotalAmount(items).toStringAsFixed(0)}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 10),
-
-                // ITEM LIST
-                ...items.map((item) {
-                  return ListTile(
-                    dense: true,
-                    leading: Image.network(
-                      item['logo'] ?? '',
-                      width: 35,
-                      height: 35,
-                      fit: BoxFit.cover,
-                    ),
-                    title: Text(item['itemName'] ?? ''),
-                    subtitle: Text(
-                      "Qty: ${item['itemQty']} x ${item['itemPrice']}",
-                    ),
-                    trailing: Text(
-                      "TZS ${(item['itemQty'] * item['itemPrice'])}",
-                    ),
-                  );
-                }).toList(),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Close"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  int getTotalItems(List items) {
-    return items.fold<int>(
-      0,
-      (sum, item) => sum + (item['itemQty'] ?? 0) as int,
-    );
-  }
-
-  double getTotalAmount(List items) {
-    return items.fold<double>(
-      0,
-      (sum, item) => sum + ((item['itemQty'] ?? 0) * (item['itemPrice'] ?? 0)),
     );
   }
 }
