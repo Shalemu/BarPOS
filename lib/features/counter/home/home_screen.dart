@@ -1,6 +1,6 @@
 import 'package:barpos/core/bottom_nav_controller.dart';
 import 'package:barpos/core/constants/app_colors.dart';
-import 'package:barpos/core/widgets/counter/CounterOrders_widget.dart';
+import 'package:barpos/core/widgets/counter/orderList_widget/CounterOrders_widget.dart';
 import 'package:barpos/core/widgets/counter/myCounter_widget.dart';
 import 'package:barpos/features/counter/home/home_controller.dart';
 import 'package:barpos/features/profile/profile_screen.dart';
@@ -15,7 +15,7 @@ class CounterHomeScreen extends StatelessWidget {
       case 0:
         final counter = homeController.selectedMyCounter.value;
 
-        return counter == null ? "My Counters" : "Counter: ${counter.name}";
+        return counter == null ? "My Counters" : counter.name;
 
       case 1:
         return "History";
@@ -40,29 +40,29 @@ class CounterHomeScreen extends StatelessWidget {
     final homeController = Get.find<CounterHomeController>();
 
     final pages = [
-  /// HOME (DYNAMIC)
-  Obx(() {
-    final controller = Get.find<CounterHomeController>();
+      /// HOME (DYNAMIC)
+      Obx(() {
+        final controller = Get.find<CounterHomeController>();
 
-    if (controller.selectedMyCounter.value == null) {
-      return const MyCounterSelectionWidget();
-    } else {
-      return CounterOrdersWidget(); 
-    }
-  }),
+        if (controller.selectedMyCounter.value == null) {
+          return const MyCounterSelectionWidget();
+        } else {
+          return CounterOrdersWidget();
+        }
+      }),
 
-  /// HISTORY
-  const Center(child: Text("History (No data yet)")),
+      /// HISTORY
+      const Center(child: Text("History (No data yet)")),
 
-  /// POS
-  const Center(child: Text("POS (Coming soon)")),
+      /// POS
+      const Center(child: Text("POS (Coming soon)")),
 
-  /// CART
-  const Center(child: Text("Cart (No data yet)")),
+      /// CART
+      const Center(child: Text("Cart (No data yet)")),
 
-  /// PROFILE
-  const ProfileScreen(),
-];
+      /// PROFILE
+      const ProfileScreen(),
+    ];
 
     return Scaffold(
       /// APP BAR
@@ -140,12 +140,12 @@ class CounterHomeScreen extends StatelessWidget {
                 if (index == 0) {
                   final token = homeController.authProvider.accessToken.value;
 
-                  if (token != null && token.isNotEmpty) {
-                    homeController.loadMyCounters(token);
-                  } else {
-                    homeController.debugStatus.value = " No token found";
-                    print(" NO TOKEN");
+                  if (token == null || token.isEmpty) {
+                    debugPrint("NO TOKEN");
+                    return;
                   }
+
+                  homeController.loadMyCounters(token);
                 }
               },
 

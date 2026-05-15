@@ -39,7 +39,6 @@ class AddItemsSheet extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            /// INLINE NOTIFICATION (🔥 NEW)
             Obx(() {
               if (!controller.showSheetMessage.value) {
                 return const SizedBox.shrink();

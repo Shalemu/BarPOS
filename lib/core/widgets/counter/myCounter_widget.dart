@@ -39,7 +39,6 @@ class MyCounterSelectionWidget extends StatelessWidget {
               hintText: "Search counters...",
               onChanged: controller.setCounterSearch,
             ),
-
             const SizedBox(height: 20),
 
             /// INFO CARD
@@ -96,7 +95,6 @@ class MyCounterSelectionWidget extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-           
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -169,7 +167,6 @@ class MyCounterSelectionWidget extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                       
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
