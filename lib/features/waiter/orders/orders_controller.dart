@@ -77,7 +77,7 @@ class OrdersController extends GetxController {
 
       orders.assignAll(result);
 
-      print("========== ORDERS LOADED ==========");
+    
       print("Total Orders: ${result.length}");
 
       for (final order in result) {
@@ -196,7 +196,7 @@ class OrdersController extends GetxController {
               ? null
               : tableRef.trim();
 
-      print("========== SUBMIT ORDER ==========");
+    
       print("Table: $cleanedTable");
       print("Counter ID: $counterId");
       print("Items Count: ${items.length}");
@@ -261,7 +261,7 @@ class OrdersController extends GetxController {
     try {
       isLoading.value = true;
 
-      print("========== ADD ITEMS ==========");
+   
       print("Order ID: $orderId");
 
       for (final item in items) {

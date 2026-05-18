@@ -1,3 +1,5 @@
+import 'package:barpos/features/counter/Pos/counter_list_binding.dart';
+import 'package:barpos/features/counter/Pos/counter_list_screen.dart';
 import 'package:barpos/features/counter/home/home_binding.dart';
 import 'package:barpos/features/counter/home/home_screen.dart';
 import 'package:barpos/features/waiter/addItem/add_items_binding.dart';
@@ -113,6 +115,8 @@ GetPage(
       binding: OrdersBinding(),
     ),
 
+    
+
     // PROFILE
     GetPage(
       name: AppRoutes.profile,
@@ -125,5 +129,13 @@ GetPage(
   page: () => const AddItemsScreen(),
   binding: AddItemsBinding(),
 ),
+
+
+    GetPage(
+      name: AppRoutes.itemList,
+      page: () => CounterListScreen(),
+      binding: ItemListBinding(),
+    ),
+
   ];
 }

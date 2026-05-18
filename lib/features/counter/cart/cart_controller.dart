@@ -19,7 +19,7 @@ class CartController extends GetxController {
         message: "No counter selected",
         color: Colors.red,
         icon: Icons.error,
-        seconds: 3,
+        seconds: 4,
       );
       return "No counter selected";
     }
@@ -28,8 +28,9 @@ class CartController extends GetxController {
       (e) => e.uniqueId == product.uniqueId && e.counterId == counterId,
     );
 
-    // STOCK CHECK
-    if (product.category.toLowerCase() == "product") {
+    final isStockLimited = product.category.toLowerCase() == "product";
+
+    if (isStockLimited) {
       final currentQty = index != -1 ? cartItems[index].quantity : 0;
 
       if (currentQty >= product.availableQty) {
@@ -38,7 +39,7 @@ class CartController extends GetxController {
           message: "Only ${product.availableQty} items available",
           color: Colors.red,
           icon: Icons.warning,
-          seconds: 3,
+          seconds: 4,
         );
         return "Stock limit reached";
       }
@@ -54,7 +55,7 @@ class CartController extends GetxController {
             message: "Only ${product.availableQty} items available",
             color: Colors.red,
             icon: Icons.warning,
-            seconds: 3,
+            seconds: 4,
           );
           return "Stock limit reached";
         }
@@ -86,43 +87,44 @@ class CartController extends GetxController {
       message: "${product.name} added to cart",
       color: Colors.green,
       icon: Icons.check_circle,
-      seconds: 3,
+      seconds: 4,
     );
 
     return null;
   }
 
   // INCREASE
-  String? increaseQty(
-    BuildContext context,
-    String uniqueId,
-    ProductModel product,
-  ) {
-    final index = cartItems.indexWhere((e) => e.uniqueId == uniqueId);
+  String? increaseQty(BuildContext context, String uniqueId) {
+  final index = cartItems.indexWhere((e) => e.uniqueId == uniqueId);
 
-    if (index == -1) return null;
+  if (index == -1) return null;
 
-    final item = cartItems[index];
+  final item = cartItems[index];
 
-    if (product.category.toLowerCase() == "product") {
-      if (item.quantity >= product.availableQty) {
-        TopNotification.show(
-          context,
-          message: "Only ${product.availableQty} items available",
-          color: Colors.red,
-          icon: Icons.warning,
-          seconds: 3,
-        );
-        return "Stock limit";
-      }
+  final isStockLimited = item.category.toLowerCase() == "product";
+
+  // ✅ ONLY product has stock limit
+  if (isStockLimited) {
+    if (item.remainingQty <= 0) {
+      TopNotification.show(
+        context,
+        message: "Stock limit reached",
+        color: Colors.red,
+        icon: Icons.warning,
+        seconds: 4,
+      );
+      return "Stock limit";
     }
 
-    item.quantity++;
-    item.remainingQty = product.availableQty - item.quantity;
-    cartItems.refresh();
-    return null;
+    item.remainingQty = item.remainingQty - 1;
   }
 
+
+  item.quantity++;
+
+  cartItems.refresh();
+  return null;
+}
   // DECREASE
   void decreaseQty(BuildContext context, String uniqueId) {
     final index = cartItems.indexWhere((e) => e.uniqueId == uniqueId);
@@ -132,21 +134,17 @@ class CartController extends GetxController {
     final item = cartItems[index];
 
     if (item.quantity > 1) {
-      item.quantity--;
-
-      // FIX: use remainingQty logic based on original stock
+      item.quantity++;
       item.remainingQty = item.remainingQty + 1;
     } else {
-      final removed = item.name;
-
       cartItems.removeAt(index);
 
       TopNotification.show(
         context,
-        message: "$removed removed from cart",
+        message: "${item.name} removed",
         color: Colors.orange,
         icon: Icons.remove_circle,
-        seconds: 3,
+        seconds: 4,
       );
     }
 

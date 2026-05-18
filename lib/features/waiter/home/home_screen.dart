@@ -47,7 +47,7 @@ class WaiterHomeScreen extends StatelessWidget {
             final counter = homeController.selectedCounter.value;
 
             return Text(
-              counter == null ? "Select Counter" : "Counter: ${counter.name}",
+              counter == null ? "Select Counter" : counter.name,
               style: const TextStyle(
                 color: AppColors.white,
                 fontWeight: FontWeight.w600,

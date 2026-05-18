@@ -1,17 +1,17 @@
 import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/core/widgets/top_notification.dart';
-import 'package:barpos/features/counter/home/home_controller.dart';
+import 'package:barpos/features/counter/cart/cart_controller.dart';
 import 'package:barpos/features/waiter/orders/orders_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'cart_controller.dart';
+import 'package:intl/intl.dart';
 
 class CartScreen extends StatelessWidget {
   CartScreen({super.key});
 
   final CartController controller = Get.find<CartController>();
-  final CounterHomeController homeController = Get.find<CounterHomeController>();
   final OrdersController ordersController = Get.find<OrdersController>();
+
   final TextEditingController tableController = TextEditingController();
 
   Widget _qtyBtn(
@@ -36,41 +36,36 @@ class CartScreen extends StatelessWidget {
         child: Icon(
           icon,
           size: 16,
-          color: active || isAdd ? Colors.white : Colors.black,
+          color: (active || isAdd) ? Colors.white : Colors.black,
         ),
       ),
     );
   }
 
+  @override
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat("#,##0");
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
 
       body: Obx(() {
         if (controller.cartItems.isEmpty) {
-          return Center(
+          return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.shopping_cart_outlined,
                   size: 80,
-                  color: Colors.grey.shade400,
+                  color: Colors.grey,
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Your cart is empty",
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 4),
+                SizedBox(height: 10),
                 Text(
-                  "Add items to continue",
-                  style: TextStyle(color: Colors.grey.shade500),
+                  "Cart is empty",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
+                SizedBox(height: 5),
+                Text("Add products to continue"),
               ],
             ),
           );
@@ -78,20 +73,19 @@ class CartScreen extends StatelessWidget {
 
         return Stack(
           children: [
-            /// ================= ITEMS =================
+            /// ================= LIST =================
             ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 160),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 220),
               itemCount: controller.cartItems.length,
               itemBuilder: (context, index) {
                 final item = controller.cartItems[index];
 
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 14),
+                  margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFF0F1F3)),
+                    borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.04),
@@ -103,74 +97,58 @@ class CartScreen extends StatelessWidget {
 
                   child: Row(
                     children: [
-                      /// IMAGE (inner card style like your sheet)
+                      /// IMAGE
                       Container(
                         width: 55,
                         height: 55,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F6FA),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE9ECF1)),
+                          color: Colors.grey.shade100,
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: Image.network(
                           item.logo,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              const Icon(Icons.fastfood),
+                          errorBuilder: (_, __, ___) => const Icon(Icons.image),
                         ),
                       ),
 
                       const SizedBox(width: 12),
 
-                      /// DETAILS
+                      /// INFO
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               item.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 14,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-
                             const SizedBox(height: 4),
-
                             Text(
                               item.category,
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: Colors.blueGrey,
+                                color: Colors.grey,
                               ),
                             ),
-
-                            const SizedBox(height: 6),
-
+                            const SizedBox(height: 4),
                             Text(
                               "TZS ${item.price}",
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                              style: TextStyle(
                                 color: AppColors.primary,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            Text(
-                              "Remaining: ${item.remainingQty}",
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
                       ),
 
-                      /// QUANTITY CONTROL (premium style)
+                      /// QTY CONTROL
                       Container(
                         height: 34,
                         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -181,7 +159,7 @@ class CartScreen extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            /// MINUS BUTTON
+                            /// MINUS
                             _qtyBtn(
                               Icons.remove,
                               () => controller.decreaseQty(
@@ -190,7 +168,7 @@ class CartScreen extends StatelessWidget {
                               ),
                             ),
 
-                            /// QTY TEXT
+                            /// QTY
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
@@ -204,14 +182,21 @@ class CartScreen extends StatelessWidget {
                                 return Text(
                                   "${cartItem.quantity}",
                                   style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 );
                               }),
                             ),
 
-                          
+                            /// PLUS
+                            _qtyBtn(
+                              Icons.add,
+                              () => controller.increaseQty(
+                                context,
+                                item.uniqueId,
+                              ),
+                              isAdd: true,
+                            ),
                           ],
                         ),
                       ),
@@ -221,15 +206,16 @@ class CartScreen extends StatelessWidget {
               },
             ),
 
+            /// ================= BOTTOM PANEL =================
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                padding: const EdgeInsets.all(16),
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  border: Border(top: BorderSide(color: Color(0xFFE9EBF0))),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
@@ -241,45 +227,33 @@ class CartScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    /// TOTAL CARD (like your sheet style)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF6F7FB),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE6E8EF)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Total",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey,
+                    /// TOTAL
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Total",
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        Obx(() {
+                          return Text(
+                            "TZS ${currencyFormat.format(controller.totalPrice)}",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          Obx(
-                            () => Text(
-                              "TZS ${controller.totalPrice.toStringAsFixed(0)}",
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                          );
+                        }),
+                      ],
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
 
-                    /// TABLE INPUT (clean style)
+                    /// TABLE INPUT
                     TextField(
                       controller: tableController,
                       decoration: InputDecoration(
-                        hintText: "Table number (optional)",
-                        prefixIcon: const Icon(Icons.table_bar_outlined),
+                        hintText: "Table number",
                         filled: true,
                         fillColor: const Color(0xFFF3F4F6),
                         border: OutlineInputBorder(
@@ -289,12 +263,12 @@ class CartScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
 
-                    /// BUTTON
+                    /// SUBMIT BUTTON
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
+                      height: 50,
                       child: Obx(() {
                         final loading = ordersController.isLoading.value;
 
@@ -302,14 +276,12 @@ class CartScreen extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           onPressed: loading
                               ? null
                               : () async {
-                                  final tableRef = tableController.text.trim();
-
                                   final items = controller.cartItems.map((
                                     item,
                                   ) {
@@ -322,7 +294,7 @@ class CartScreen extends StatelessWidget {
 
                                   final result = await ordersController
                                       .submitOrder(
-                                        tableRef: tableRef,
+                                        tableRef: tableController.text.trim(),
                                         items: items,
                                       );
 
@@ -343,7 +315,7 @@ class CartScreen extends StatelessWidget {
                                       message: result,
                                       color: Colors.red,
                                       icon: Icons.error,
-                                      seconds: 4,
+                                       seconds: 4,
                                     );
                                   }
                                 },
@@ -355,9 +327,8 @@ class CartScreen extends StatelessWidget {
                               : const Text(
                                   "SUBMIT ORDER",
                                   style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1,
-                                    color:Colors.white,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                         );

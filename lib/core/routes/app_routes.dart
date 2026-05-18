@@ -24,4 +24,7 @@ class AppRoutes {
 
   // Other
   static const payment = '/payment';
+
+  // item list
+    static const itemList = '/items';
 }

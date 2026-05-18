@@ -4,6 +4,7 @@ import 'package:barpos/features/waiter/home/home_controller.dart';
 import 'package:barpos/features/waiter/orders/orders_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'cart_controller.dart';
 
 class CartScreen extends StatelessWidget {
@@ -43,6 +44,7 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget build(BuildContext context) {
+    final currencyFormat = NumberFormat("#,##0");
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
 
@@ -274,13 +276,13 @@ class CartScreen extends StatelessWidget {
                             ),
                           ),
                           Obx(
-                            () => Text(
-                              "TZS ${controller.totalPrice.toStringAsFixed(0)}",
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            () =>  Text(
+                            "TZS ${currencyFormat.format(controller.totalPrice)}",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
+                          ),
                           ),
                         ],
                       ),
@@ -292,7 +294,7 @@ class CartScreen extends StatelessWidget {
                     TextField(
                       controller: tableController,
                       decoration: InputDecoration(
-                        hintText: "Table number (optional)",
+                        hintText: "Table number ",
                         prefixIcon: const Icon(Icons.table_bar_outlined),
                         filled: true,
                         fillColor: const Color(0xFFF3F4F6),

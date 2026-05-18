@@ -17,7 +17,6 @@ class OrdersScreen extends GetView<OrdersController> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final orders = controller.filteredOrders;
         return Column(
           children: [
             _buildSearchBar(),

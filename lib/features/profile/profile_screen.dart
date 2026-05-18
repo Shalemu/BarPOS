@@ -54,7 +54,7 @@ class ProfileScreen extends GetView<ProfileController> {
 
                       // Name
                       Text(
-                        controller.userName,
+                         controller.fullName.isEmpty ? "User" : controller.fullName,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,

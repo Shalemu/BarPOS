@@ -17,7 +17,6 @@ class OrdersScreen extends GetView<OrdersController> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final orders = controller.filteredOrders;
         return Column(
           children: [
             _buildSearchBar(),
@@ -107,7 +106,7 @@ class OrdersScreen extends GetView<OrdersController> {
                       firstDate: DateTime(2023),
                       lastDate: DateTime.now(),
                       initialDateRange: hasFilter
-                          ? DateTimeRange(start: from!, end: to!)
+                          ? DateTimeRange(start: from, end: to)
                           : null,
                     );
 

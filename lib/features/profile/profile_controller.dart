@@ -7,7 +7,19 @@ class ProfileController extends GetxController {
 
   var isLoading = false.obs;
 
-  String get userName => authProvider.user.value?.firstName ?? "User";
+  String get firstName => authProvider.user.value?.firstName ?? "";
+
+  // String get middleName => authProvider.user.value?.middleName ?? "";
+
+  String get lastName => authProvider.user.value?.lastName ?? "";
+
+  String get fullName {
+    return [
+      firstName,
+      // middleName,
+      lastName,
+    ].where((e) => e.trim().isNotEmpty).join(" ");
+  }
 
   String get email => authProvider.user.value?.email ?? "No email";
 

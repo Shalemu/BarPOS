@@ -1,4 +1,5 @@
-import 'package:barpos/features/waiter/cart/cart_controller.dart';
+
+import 'package:barpos/features/counter/cart/cart_controller.dart' show CartController;
 import 'package:barpos/features/waiter/orders/orders_controller.dart';
 import 'package:barpos/features/profile/profile_controller.dart';
 import 'package:barpos/provider/auth_provider.dart';

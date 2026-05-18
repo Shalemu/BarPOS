@@ -40,6 +40,12 @@ class CounterHomeController extends GetxController {
   final AuthProvider authProvider = Get.find<AuthProvider>();
   final CounterProvider counterProvider = Get.find<CounterProvider>();
 
+  String get token => authProvider.accessToken.value ?? '';
+  
+
+int get counterId =>
+    selectedMyCounter.value?.id ?? 0;
+
   String get userName => authProvider.user.value?.firstName ?? "User";
 
   bool _initialized = false;
@@ -308,7 +314,7 @@ class CounterHomeController extends GetxController {
     showSheetMessage.value = true;
 
     await DelayHelper.wait(AppDelay.medium);
-    onClose?.call();
+    onClose.call();
 
     showSheetMessage.value = false;
 

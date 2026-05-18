@@ -29,7 +29,9 @@ class CartController extends GetxController {
     );
 
     // STOCK CHECK
-    if (product.category.toLowerCase() == "product") {
+    final isStockLimited = product.category.toLowerCase() == "product";
+
+    if (isStockLimited) {
       final currentQty = index != -1 ? cartItems[index].quantity : 0;
 
       if (currentQty >= product.availableQty) {
