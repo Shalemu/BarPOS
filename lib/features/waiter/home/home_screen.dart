@@ -75,7 +75,7 @@ class WaiterHomeScreen extends StatelessWidget {
 
             if (index == 0 && counter != null) {
               return IconButton(
-                icon: const Icon(Icons.refresh),
+                 icon: const Icon(Icons.swap_horiz),
                 color: AppColors.white,
                 onPressed: () {
                   homeController.selectedCounter.value = null;

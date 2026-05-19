@@ -38,4 +38,9 @@ class ApiConstants {
   // PICK / PROCESS ORDER
   static const String pickOrder =
       "$baseUrl/orders/process";
+
+
+  // Counter submit order (pos)
+  static const String counterSubmitOrder =
+      "$baseUrl/orders/create";
 }

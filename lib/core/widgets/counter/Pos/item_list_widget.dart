@@ -37,68 +37,64 @@ class CounterItemsWidget extends StatelessWidget {
         const SizedBox(height: 12),
 
         // CATEGORY FILTER
-        Obx(() {
-          final categories = controller.categories;
-
-          return SizedBox(
+        Obx(
+          () => SizedBox(
             height: 44,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: categories.length,
+              itemCount: controller.categories.length,
               itemBuilder: (context, index) {
-                final category = categories[index];
+                final category = controller.categories[index];
 
-                final isSelected =
-                    controller.selectedCategory.value.toLowerCase().trim() ==
-                    category.toLowerCase().trim();
+                return Obx(() {
+                  final isSelected =
+                      controller.selectedCategory.value == category;
 
-                return GestureDetector(
-                  onTap: () => controller.changeCategory(category),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    margin: const EdgeInsets.only(right: 10),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary
-                          : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+                  return GestureDetector(
+                    onTap: () => controller.changeCategory(category),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      margin: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
                         color: isSelected
                             ? AppColors.primary
-                            : Colors.grey.shade300,
+                            : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary
+                              : Colors.grey.shade300,
+                        ),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.25),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : [],
                       ),
-                      boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: AppColors.primary.withOpacity(0.25),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ]
-                          : [],
-                    ),
-
-                    alignment: Alignment.center,
-
-                    child: Text(
-                      category,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
-                        fontSize: 13,
-                        fontWeight: isSelected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
+                      alignment: Alignment.center,
+                      child: Text(
+                        category,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black87,
+                          fontSize: 13,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                );
+                  );
+                });
               },
             ),
-          );
-        }),
+          ),
+        ),
 
         const SizedBox(height: 12),
 
@@ -212,7 +208,6 @@ class CounterItemsWidget extends StatelessWidget {
 
                             const SizedBox(height: 10),
 
-                            /// ---------------- CART BUTTON ----------------
                             Obx(() {
                               final cartController = Get.find<CartController>();
 

@@ -145,7 +145,7 @@ class CounterItemsWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      /// ---------------- IMAGE INNER CARD ----------------
+                      //IMAGE 
                       Container(
                         height: 110,
                         margin: const EdgeInsets.all(10),
@@ -168,7 +168,7 @@ class CounterItemsWidget extends StatelessWidget {
                         ),
                       ),
 
-                      /// ---------------- CONTENT ----------------
+                      //CONTENT 
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Column(
@@ -217,7 +217,7 @@ class CounterItemsWidget extends StatelessWidget {
 
                             const SizedBox(height: 10),
 
-                            /// ---------------- CART BUTTON ----------------
+                            // CART BUTTON 
                             Obx(() {
                               final cartController =
                                   Get.find<CartController>();

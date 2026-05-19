@@ -1,5 +1,6 @@
 import 'package:barpos/core/constants/app_colors.dart';
 import 'package:barpos/core/widgets/top_notification.dart';
+import 'package:barpos/core/widgets/waiter/cart_item_card.dart';
 import 'package:barpos/features/waiter/home/home_controller.dart';
 import 'package:barpos/features/waiter/orders/orders_controller.dart';
 import 'package:flutter/material.dart';
@@ -81,161 +82,39 @@ class CartScreen extends StatelessWidget {
         return Stack(
           children: [
             /// ================= ITEMS =================
-            ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 160),
-              itemCount: controller.cartItems.length,
-              itemBuilder: (context, index) {
-                final item = controller.cartItems[index];
+         ListView.builder(
+  padding: const EdgeInsets.fromLTRB(
+    16,
+    10,
+    16,
+    160,
+  ),
+  itemCount: controller.cartItems.length,
+  itemBuilder: (context, index) {
 
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFFF0F1F3)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+    final item = controller.cartItems[index];
 
-                  child: Row(
-                    children: [
-                      /// IMAGE (inner card style like your sheet)
-                      Container(
-                        width: 55,
-                        height: 55,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F6FA),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE9ECF1)),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Image.network(
-                          item.logo,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              const Icon(Icons.fastfood),
-                        ),
-                      ),
+    return CartItemCard(
+      item: item,
+      controller: controller,
 
-                      const SizedBox(width: 12),
+      onIncrease: () {
+        final product =
+            homeController.products.firstWhere(
+          (p) =>
+              p.uniqueId ==
+              item.uniqueId,
+        );
 
-                      /// DETAILS
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.name,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            Text(
-                              item.category,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.blueGrey,
-                              ),
-                            ),
-
-                            const SizedBox(height: 6),
-
-                            Text(
-                              "TZS ${item.price}",
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            Text(
-                              "Remaining: ${item.remainingQty}",
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      /// QUANTITY CONTROL (premium style)
-                      Container(
-                        height: 34,
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            /// MINUS BUTTON
-                            _qtyBtn(
-                              Icons.remove,
-                              () => controller.decreaseQty(
-                                context,
-                                item.uniqueId,
-                              ),
-                            ),
-
-                            /// QTY TEXT
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
-                              child: Obx(() {
-                                final cartItem = controller.cartItems
-                                    .firstWhere(
-                                      (e) => e.uniqueId == item.uniqueId,
-                                    );
-
-                                return Text(
-                                  "${cartItem.quantity}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
-                                  ),
-                                );
-                              }),
-                            ),
-
-                            /// PLUS BUTTON
-                            _qtyBtn(Icons.add, () {
-                              final product = homeController.products
-                                  .firstWhere(
-                                    (p) => p.uniqueId == item.uniqueId,
-                                  );
-
-                              controller.increaseQty(
-                                context,
-                                item.uniqueId,
-                                product,
-                              );
-
-                          
-                            }, isAdd: true),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+        controller.increaseQty(
+          context,
+          item.uniqueId,
+          product,
+        );
+      },
+    );
+  },
+),
 
             Positioned(
               left: 0,
@@ -276,13 +155,13 @@ class CartScreen extends StatelessWidget {
                             ),
                           ),
                           Obx(
-                            () =>  Text(
-                            "TZS ${currencyFormat.format(controller.totalPrice)}",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                            () => Text(
+                              "TZS ${currencyFormat.format(controller.totalPrice)}",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
                           ),
                         ],
                       ),
@@ -373,7 +252,7 @@ class CartScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 1,
-                                    color:Colors.white,
+                                    color: Colors.white,
                                   ),
                                 ),
                         );

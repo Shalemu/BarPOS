@@ -1,4 +1,6 @@
+import 'package:barpos/provider/auth_provider.dart';
 import 'package:barpos/provider/waiter/counter_provider.dart';
+import 'package:barpos/services/counter/cart_service.dart';
 import 'package:barpos/services/model/cart_model.dart';
 import 'package:barpos/services/model/product_model.dart';
 import 'package:barpos/core/widgets/top_notification.dart';
@@ -8,6 +10,9 @@ import 'package:get/get.dart';
 class CartController extends GetxController {
   final cartItems = <CartItem>[].obs;
   final CounterProvider counterProvider = Get.find<CounterProvider>();
+  final isLoading = false.obs;
+  final isLoadingMore = false.obs;
+    final CartService _service = CartService();
 
   // ADD TO CART
   String? addToCart(BuildContext context, ProductModel product) {
@@ -103,7 +108,7 @@ class CartController extends GetxController {
 
   final isStockLimited = item.category.toLowerCase() == "product";
 
-  // ✅ ONLY product has stock limit
+  //  product validation
   if (isStockLimited) {
     if (item.remainingQty <= 0) {
       TopNotification.show(
@@ -160,4 +165,46 @@ class CartController extends GetxController {
   void clearCart() {
     cartItems.clear();
   }
+
+ Future<String?> submitOrder({
+  String? tableRef,
+  required List<Map<String, dynamic>> items,
+  Map<String, dynamic>? payments, 
+}) async {
+  final auth = Get.find<AuthProvider>();
+  final counterId = counterProvider.selectedCounterId.value;
+
+  if (counterId == null) {
+    return "Please select counter first";
+  }
+
+  try {
+    isLoading.value = true;
+
+    final cleanedTable =
+        (tableRef == null || tableRef.trim().isEmpty)
+            ? null
+            : tableRef.trim();
+
+    final response = await _service.submitOrder(
+      token: auth.accessToken.value!,
+      counterId: counterId,
+      tableRef: cleanedTable,
+      items: items,
+      payments: payments, 
+    );
+
+
+    if (response.isSuccess) {
+      return null; // success
+    } else {
+      return response.message; // error message
+    }
+  } catch (e) {
+    print("SUBMIT ERROR: $e");
+    return e.toString();
+  } finally {
+    isLoading.value = false;
+  }
+}
 }

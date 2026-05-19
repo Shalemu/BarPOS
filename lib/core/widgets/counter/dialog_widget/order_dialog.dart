@@ -81,12 +81,21 @@ class OrderDialog {
                         amountHint: "Enter amount (TZS)",
                         descHint: "Add payment note (optional)",
                       ),
+
                       const SizedBox(height: 12),
-                      PaymentMethodSelector(controller: controller),
+
+                      PaymentMethodSelector(
+                        methods: controller.paymentMethods,
+                        selectedId: controller.selectedPaymentMethod.value,
+                        onChanged: (id) {
+                          controller.selectedPaymentMethod.value = id;
+                        },
+                      ),
+
                       const SizedBox(height: 16),
                     ],
 
-                    /// 🔥 INLINE NOTIFICATION (FIXED HERE)
+                    // INLINE NOTIFICATION (FIXED HERE)
                     Obx(() {
                       if (!controller.showSheetMessage.value) {
                         return const SizedBox();

@@ -37,7 +37,6 @@ class CounterSelectionWidget extends StatelessWidget {
 
             const SizedBox(height: 18),
 
-        
             AppSearchBar(
               hintText: "Search counters...",
               onChanged: controller.setCounterSearch,
@@ -45,7 +44,7 @@ class CounterSelectionWidget extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-    
+            /// HEADER CARD (UNCHANGED)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -71,9 +70,7 @@ class CounterSelectionWidget extends StatelessWidget {
                       size: 26,
                     ),
                   ),
-
                   const SizedBox(width: 12),
-
                   const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,17 +96,14 @@ class CounterSelectionWidget extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-       
             Expanded(
               child: Obx(() {
-                
                 if (controller.isLoadingCounters.value) {
                   return const Center(child: DotLoader());
                 }
 
                 final list = controller.filteredCounters;
 
-             
                 if (list.isEmpty) {
                   return const Center(
                     child: Text(
@@ -119,27 +113,25 @@ class CounterSelectionWidget extends StatelessWidget {
                   );
                 }
 
-               
                 return GridView.builder(
                   padding: const EdgeInsets.only(bottom: 16),
-                  itemCount: list.length,
+
+                  // ✅ FIXED ONLY (NO LAYOUT CHANGE)
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 1.1,
+                    childAspectRatio: 0.9, // FIX OVERFLOW ONLY
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
+
+                  itemCount: list.length,
+
                   itemBuilder: (context, index) {
                     final counter = list[index];
 
                     return GestureDetector(
                       onTap: () {
-                        final controller = Get.find<CounterListController>();
-
-                        debugPrint("Counter tapped: ${counter.name}");
-
                         controller.selectMyCounter(counter);
-
                         Get.find<BottomNavController>().changeTab(1);
                       },
 
@@ -159,48 +151,126 @@ class CounterSelectionWidget extends StatelessWidget {
                           ],
                         ),
 
+                        // ✅ REMOVED EXTRA INNER CONTAINER (MAIN FIX)
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                         
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.primary.withOpacity(0.2),
-                                    AppColors.primary.withOpacity(0.05),
-                                  ],
+                            /// TOP ROW (UNCHANGED)
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primary,
+                                        AppColors.primary.withOpacity(0.75),
+                                      ],
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primary.withOpacity(
+                                          0.25,
+                                        ),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.point_of_sale_rounded,
+                                    color: Colors.white,
+                                    size: 22,
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(
-                                Icons.point_of_sale_rounded,
-                                color: AppColors.primary,
-                              ),
+
+                                const SizedBox(width: 10),
+
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withOpacity(
+                                          0.08,
+                                        ),
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      child: const Text(
+                                        "POS",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.primary,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            /// TITLE
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  counter.name,
+                                  maxLines: 1,
+                                  textAlign: TextAlign.center,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 6),
+
+                                Text(
+                                  "Tap to open POS",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
                             ),
 
                             const Spacer(),
 
-                            // ================= NAME =================
-                            Text(
-                              counter.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-
-                            const SizedBox(height: 4),
-
-                            // ================= SUBTITLE =================
-                            Text(
-                              "Tap to open POS",
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
+                            // BUTTON TO OPEN POS
+                            Align(
+                              alignment: Alignment.center,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Text(
+                                  "Open Counter",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
                               ),
                             ),
                           ],

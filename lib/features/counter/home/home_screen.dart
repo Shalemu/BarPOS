@@ -97,7 +97,7 @@ class _CounterHomeScreenState extends State<CounterHomeScreen> {
         return CounterItemsWidget();
       }),
 
-     CartScreen(),
+      CartScreen(),
 
       const ProfileScreen(),
     ];
@@ -112,6 +112,45 @@ class _CounterHomeScreenState extends State<CounterHomeScreen> {
             elevation: 0,
             centerTitle: true,
             backgroundColor: AppColors.primary,
+
+            actions: [
+              Obx(() {
+                final tabIndex = navController.currentIndex.value;
+                final posController = Get.find<CounterListController>();
+                final homeController = Get.find<CounterHomeController>();
+
+                // Show ONLY if a counter is selected (either side)
+                final hasHomeCounter =
+                    homeController.selectedMyCounter.value != null;
+
+                final hasPosCounter =
+                    posController.selectedCounter.value != null;
+
+                if (tabIndex == 0 && hasHomeCounter) {
+                  return IconButton(
+                    icon: const Icon(Icons.swap_horiz),
+                    color: Colors.white,
+                    onPressed: () {
+                      /// reset HOME counter
+                      homeController.selectedMyCounter.value = null;
+                    },
+                  );
+                }
+
+                if (tabIndex == 1 && hasPosCounter) {
+                  return IconButton(
+                    icon: const Icon(Icons.swap_horiz),
+                    color: Colors.white,
+                    onPressed: () {
+                      /// reset POS counter
+                      posController.selectedCounter.value = null;
+                    },
+                  );
+                }
+
+                return const SizedBox();
+              }),
+            ],
             title: Text(
               _getTitle(index, homeController),
               style: const TextStyle(

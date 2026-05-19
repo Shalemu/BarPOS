@@ -52,7 +52,7 @@ class CounterListController extends GetxController {
       debugPrint("Counters loaded: ${counters.length}");
     } catch (e) {
       errorMessage.value = e.toString();
-      debugPrint("❌ loadCounters error: $e");
+      debugPrint("loadCounters error: $e");
     } finally {
       isLoadingCounters.value = false;
     }
@@ -86,30 +86,30 @@ class CounterListController extends GetxController {
 
   
   Future<void> loadProducts(int counterId) async {
-    try {
-      isLoadingProducts.value = true;
+  try {
+    isLoadingProducts.value = true;
 
-      debugPrint("Loading products for counterId: $counterId");
+    final result = await _productService.fetchCounterProducts(
+      token,
+      counterId,
+    );
 
-      final result = await _productService.fetchCounterProducts(
-        token,
-        counterId,
-      );
+    products.assignAll(result);
 
-      products.assignAll(result);
+    _generateCategories();
 
-      debugPrint("Products loaded: ${products.length}");
-
-      _generateCategories();
-    } catch (e, s) {
-      errorMessage.value = e.toString();
-
-      debugPrint("loadProducts error: $e");
-      debugPrint("$s");
-    } finally {
-      isLoadingProducts.value = false;
-    }
+    _validateSelectedCategory(); 
+  } catch (e, s) {
+    errorMessage.value = e.toString();
+  } finally {
+    isLoadingProducts.value = false;
   }
+}
+void _validateSelectedCategory() {
+  if (!categories.contains(selectedCategory.value)) {
+    selectedCategory.value = 'All';
+  }
+}
 
 
   void _generateCategories() {
